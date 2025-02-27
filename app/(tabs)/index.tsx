@@ -1,74 +1,233 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import renderCard from '@/components/ui/CardRenderer';
+import { Colors } from '@/constants/Colors';
+import { useNavigation } from '@react-navigation/native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text, StyleSheet, Image, Dimensions, ScrollView, FlatList, TouchableOpacity } from 'react-native';
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
 
 export default function HomeScreen() {
+  const data = [
+    { id: 1, text: 'Item 1', color: '#FF5733' },
+    { id: 2, text: 'Item 2', color: '#33FF57' },
+    { id: 3, text: 'Item 3', color: '#3357FF' },
+    { id: 4, text: 'Item 4', color: '#F3FF33' },
+    { id: 5, text: 'Item 5', color: '#FF33A1' },
+  ];
+
+
+  const flatListRef = useRef(null);
+  const windowWidth = Dimensions.get('window').width;
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const cardWidth = windowWidth; // Card width set to 70% of the screen width
+  const navigation = useNavigation()
+
+  const renderCards = ({ item }) => (
+   // <View style={[styles.card, { backgroundColor: item.color }]}>
+    //{ /* <Text style={styles.cardTitle}>{item.text}</Text> */ }
+    //{ /* <CardLayout title="Villa for Sale" price="$35000" location="texas" features={["pool", "parking", "Gym", "SPA"]} /> */}
+     
+      renderCard(navigation, "3bhk Villa For Sale", "30000", "Texas, USA", ["Gym", "Parking", "ClubHouse"])
+    
+ //</View>
+  );
+
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex((prevIndex) => {
+        const nextIndex = (prevIndex + 1) % data.length;
+        flatListRef.current?.scrollToIndex({ animated: true, index: nextIndex });
+        return nextIndex;
+      });
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [data.length]);
+
+  const onViewableItemsChanged = useRef(({ viewableItems }) => {
+    if (viewableItems.length > 0) {
+      setCurrentIndex(viewableItems[0].index);
+    }
+  }).current;
+
+  const viewabilityConfig = {
+    itemVisiblePercentThreshold: 50,
+  };
+
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <ScrollView style={styles.homeContainer}>
+   <View style={styles.container}>
+    <Text style={styles.title}>Top Stories</Text>
+      <FlatList
+        ref={flatListRef}
+        data={data}
+        renderItem={renderCards}
+        keyExtractor={(item) => item.id}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        snapToAlignment="center"
+        decelerationRate="fast"
+        pagingEnabled
+        contentContainerStyle={{
+          paddingHorizontal: (windowWidth - cardWidth) / 2, // Center-align the cards
+        }}
+        onViewableItemsChanged={onViewableItemsChanged}
+        viewabilityConfig={viewabilityConfig}
+      />
+       <View style={styles.dotsContainer}>
+        {data.map((_, index) => (
+          <View
+            key={index}
+            style={[
+              styles.dot,
+              index === currentIndex ? styles.activeDot : styles.inactiveDot,
+            ]}
+          />
+        ))}
+      </View>
+    </View>
+
+    <View style={styles.container}>
+      <TouchableOpacity onPress={()=>navigation.navigate("explore")}>
+    <Text style={styles.title}  >Latest Posts</Text>
+    </TouchableOpacity>
+      <FlatList
+        data={data}
+        renderItem={renderCards}
+        keyExtractor={(item) => item.id}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        snapToAlignment="center"
+        decelerationRate="fast"
+        pagingEnabled
+        contentContainerStyle={{
+          paddingHorizontal: (windowWidth - cardWidth) / 2, // Center-align the cards
+        }}
+      />
+       {/* <View style={styles.dotsContainer}>
+        {data.map((_, index) => (
+          <View
+            key={index}
+            style={[
+              styles.dot,
+              index === currentIndex ? styles.activeDot : styles.inactiveDot,
+            ]}
+          />
+        ))}
+      </View> */}
+    </View>
+
+    <View style={styles.container}>
+      <TouchableOpacity onPress={()=>navigation.navigate("explore copy")}>
+    <Text style={styles.title}>Featured Posts</Text>
+    </TouchableOpacity>
+      <FlatList
+        data={data}
+        renderItem={renderCards}
+        keyExtractor={(item) => item.id}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        snapToAlignment="center"
+        decelerationRate="fast"
+        pagingEnabled
+        contentContainerStyle={{
+          paddingHorizontal: (windowWidth - cardWidth) / 2, // Center-align the cards
+        }}
+      />
+       {/* <View style={styles.dotsContainer}>
+        {data.map((_, index) => (
+          <View
+            key={index}
+            style={[
+              styles.dot,
+              index === currentIndex ? styles.activeDot : styles.inactiveDot,
+            ]}
+          />
+        ))}
+      </View> */}
+    </View>
+
+    
+  </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
+  container: {
+    width: Dimensions.get('window').width * 0.95, // 95% of screen width
+    marginHorizontal: 10,
+    paddingVertical: 5,
+    paddingHorizontal: 5,
+    backgroundColor: '#fff',
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 5,
+    marginTop: 10,
+    alignSelf: 'center',
+  },
+  contentContainer: {
+    paddingHorizontal: 10,
+  },
+  card: {
+    width: Dimensions.get('window').width * 0.85, // 70% of screen width
+    height: 'auto',
+    marginHorizontal: 10,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    borderColor: '#000',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 5,
+    elevation: 3,
     alignItems: 'center',
-    gap: 8,
+    justifyContent: 'center',
+    overflow: 'hidden',
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  cardImage: {
+    width: '100%',
+    height: '70%',
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  cardTitle: {
+    marginTop: 10,
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  homeContainer:{
+      backgroundColor: Colors.secondary,
+      height: '100%'
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: Colors.primary,
+    marginLeft: 15
+  },
+  dotsContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    // marginTop: 10,
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginHorizontal: 4,
+  },
+  activeDot: {
+    backgroundColor: "#0078D4",
+  },
+  inactiveDot: {
+    backgroundColor: "#C4C4C4",
   },
 });
