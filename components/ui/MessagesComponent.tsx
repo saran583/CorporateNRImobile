@@ -107,7 +107,7 @@ const MessagesScreen = ({selection}) => {
             <Image source={require("../../assets/images/favicon.png")} style={styles.profileImage} />
             </View>
             <View style={[styles.box, styles.box2]}>
-            <Text style={styles.name}>{message.name}</Text>
+            <Text style={styles.name} numberOfLines={1} ellipsizeMode="tail">{message.name}</Text>
             <Text style={styles.contact} numberOfLines={3} ellipsizeMode="tail">{message.message}</Text>
             {/* <Text style={styles.contact}>{message.contact}</Text> */}
             </View>
@@ -148,36 +148,38 @@ const styles = StyleSheet.create({
   },
   received: { backgroundColor: "#e6f7ff" },
   sent: { alignSelf: "flex-end", backgroundColor: "#d9fdd3" },
-  name: { fontWeight: "bold", marginBottom: 5 },
+  name: { fontWeight: "bold",  textAlign:"left",  },
   contact: { fontSize: 15, color: "gray", marginBottom: 8 },
-  postContainer: {  borderWidth: 1, padding: 5, borderRadius: 10, borderColor: "grey" },
-  postImage: { width: Dimensions.get("window").width * 0.20, height: 75, borderRadius: 5},
-  profileImage: { width: Dimensions.get("window").width * 0.18, height: 75, borderRadius: 100},
+  postContainer: {  borderWidth: 1, padding: 5, borderRadius: 10, borderColor: "grey", },
+  postImage: { width: 75, height: 50, borderRadius: 5},
+  profileImage: { width: 50, height: 50, borderRadius: 100},
   postTitle: { fontSize: 15, fontWeight: "bold", textAlign: "center", width: Dimensions.get("window").width * 0.20 },
 
 
   dataContainer: {
     flexDirection: "row",
     width: "100%",
-    height: 100, // Adjust height as needed
+    height: 80, // Adjust height as needed
   },
   box: {
     justifyContent: "center",
-    alignItems: "center",
+    alignItems: "flex-start",
     // borderWidth: 1,
     // borderColor: "black",
   },
   box1: {
-    flex: 1.5, // 10% of total 10+30+50 = 10%
+    flex: 1, // 10% of total 10+30+50 = 10%
     // backgroundColor: "red",
   },
   box2: {
+    textAlign:"left",
     flex: 4.5, // 30% of total 10+30+50 = 30%
     // backgroundColor: "blue",
   },
   box3: {
     flex: 3, // 50% of total 10+30+50 = 50%
     // backgroundColor: "green",
+    paddingTop:25
   },
 });
 

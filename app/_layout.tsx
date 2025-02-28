@@ -39,22 +39,25 @@ export default function RootLayout() {
   // const rental = useSelector((state) => state.rental);
   // const dispatch = useDispatch()
   const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/MiSans-Regular.ttf'),
+    "MiSans-Regular": require("../assets/fonts/MiSans-Regular.ttf"),
+    // "MiSans-Semibold": require("../assets/fonts/MiSans-Semibold.ttf"),
+    // "MiSans-Normal": require("../assets/fonts/MiSans-Normal.ttf"),
+    // "MiSans-Thin": require("../assets/fonts/MiSans-Thin.ttf"),
   });
 
-  useEffect(() => {
-    SplashPage.preventAutoHideAsync();
+  // useEffect(() => {
+  //   SplashPage.preventAutoHideAsync();
   
-      async function loadFonts() {
-        await Font.loadAsync({
-          "MiSans-Regular": require("../assets/fonts/MiSans-Regular.ttf"),
-          "MiSans-Semibold": require("../assets/fonts/MiSans-Semibold.ttf"),
-          "MiSans-Normal": require("../assets/fonts/MiSans-Normal.ttf"),
-          "MiSans-Thin": require("../assets/fonts/MiSans-Thin.ttf"),
-        });
-      }
-      loadFonts();
-    }, []);
+  //     async function loadFonts() {
+  //       await Font.loadAsync({
+  //         "MiSans-Regular": require("../assets/fonts/MiSans-Regular.ttf"),
+  //         "MiSans-Semibold": require("../assets/fonts/MiSans-Semibold.ttf"),
+  //         "MiSans-Normal": require("../assets/fonts/MiSans-Normal.ttf"),
+  //         "MiSans-Thin": require("../assets/fonts/MiSans-Thin.ttf"),
+  //       });
+  //     }
+  //     loadFonts();
+  //   }, []);
 
   useEffect(() => {
     if (loaded) {
@@ -70,7 +73,7 @@ export default function RootLayout() {
   if (!loaded) {
     return null;
   }
-
+try{
   return (
     <Provider store={store}>
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
@@ -140,5 +143,9 @@ export default function RootLayout() {
     </ThemeProvider>
     </Provider>
 
-  );
+  );}
+  catch(error:any){
+    console.error("App crashed:", error);
+    return <Text style={{ color: 'red' }}>Something went wrong! {error.toString()}</Text>;
+  }
 }

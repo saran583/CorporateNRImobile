@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 5,
     elevation: 5,
-    marginTop: 10,
+    marginTop: 5,
     alignSelf: 'center',
   },
   contentContainer: {
