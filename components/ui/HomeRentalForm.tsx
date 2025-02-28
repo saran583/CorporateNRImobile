@@ -1,7 +1,7 @@
 import { Colors } from "@/constants/Colors";
 import React, { useEffect, useState } from "react";
 import { View, Text, TextInput, StyleSheet, Image, ScrollView, TouchableOpacity, CheckBox, Switch, Modal, FlatList, Animated } from "react-native";
-// import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import * as ImagePicker from 'expo-image-picker';
 import { Alert } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
@@ -344,7 +344,7 @@ const HomeRentalForm = () => {
       >
         <Text>{form.availableFrom.toDateString()}</Text>
       </TouchableOpacity>
-      {/* <DateTimePickerModal
+      <DateTimePickerModal
         isVisible={isFromDateVisible}
         mode="date"
         onConfirm={(selectedDate) => {
@@ -352,7 +352,7 @@ const HomeRentalForm = () => {
           handleInputChange("availableFrom", selectedDate)
         }}
         onCancel={() => setIsFromDateVisible(false)}
-      /> */}
+      />
         </>
         </View>
 

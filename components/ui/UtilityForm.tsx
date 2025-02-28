@@ -13,7 +13,7 @@ import {
   Button,
   Modal,
 } from "react-native";
-// import DateTimePickerModal from 'react-native-modal-dateti/me-picker';
+import DateTimePickerModal from 'react-native-modal-dateti/me-picker';
 import * as ImagePicker from 'expo-image-picker';
 import { Colors } from "@/constants/Colors";
 
@@ -202,7 +202,7 @@ const UtilityRental = () => {
       >
         <Text>{fromDate.toDateString()}</Text>
       </TouchableOpacity>
-      {/* <DateTimePickerModal
+      <DateTimePickerModal
         isVisible={isFromDateVisible}
         mode="date"
         onConfirm={(selectedDate) => {
@@ -211,7 +211,7 @@ const UtilityRental = () => {
           setFromDate(selectedDate);
         }}
         onCancel={() => setIsFromDateVisible(false)}
-      /> */}
+      />
         </>
         </View>
 
@@ -230,7 +230,7 @@ const UtilityRental = () => {
       >
         <Text>{toDate.toDateString()}</Text>
       </TouchableOpacity>
-      {/* <DateTimePickerModal
+      <DateTimePickerModal
         isVisible={isToDateVisible}
         mode="date"
         onConfirm={(selectedDate) => {
@@ -240,7 +240,7 @@ const UtilityRental = () => {
           }
         }}
         onCancel={() => setIsToDateVisible(false)}
-      /> */}
+      />
         </>
         </View>
       </View>

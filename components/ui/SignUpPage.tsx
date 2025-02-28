@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { View, Text, Button, StyleSheet, TextInput, TouchableOpacity, ScrollView, Modal } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import { Colors } from '@/constants/Colors';
-import RNPickerSelect from 'react-native-picker-select';
+// import RNPickerSelect from 'react-native-picker-select';
 import { Checkbox } from 'react-native-paper';
-// import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { FlatList } from 'react-native';
 
 const SignUpPage = () => {
@@ -181,7 +181,7 @@ const SignUpPage = () => {
                 >
                   <Text>{form.dateOfBirth.toDateString()}</Text>
                 </TouchableOpacity>
-                {/* <DateTimePickerModal
+                <DateTimePickerModal
                   isVisible={isFromDateVisible}
                   mode="date"
                   onConfirm={(selectedDate) => {
@@ -189,7 +189,7 @@ const SignUpPage = () => {
                     handleInputChange("dateOfBirth", selectedDate)
                   }}
                   onCancel={() => setIsFromDateVisible(false)}
-                /> */}
+                />
                   </>
           {errors.dateOfBirth && <Text style={styles.error}>{errors.dateOfBirth}</Text>}
         </View>
@@ -245,7 +245,7 @@ const SignUpPage = () => {
     <Text style={styles.label}>Mobile Number</Text>
     <View style={[styles.inputContainer1, errors.mobileNumber && styles.errorInput]}>
         <View style={styles.pickerContainer}>
-          <RNPickerSelect
+          {/* <RNPickerSelect
             onValueChange={(value) => setCountryCode(value)}
             items={[
               { label: '+1', value: '+1' },
@@ -254,7 +254,7 @@ const SignUpPage = () => {
             ]}
             style={pickerSelectStyles}
             value={countryCode}
-          />
+          /> */}
         </View>
         <Controller
             control={control}
