@@ -4,8 +4,13 @@ import { useForm, Controller } from 'react-hook-form';
 import { Colors } from '@/constants/Colors';
 // import RNPickerSelect from 'react-native-picker-select';
 import { Checkbox } from 'react-native-paper';
-import DateTimePickerModal from 'react-native-modal-datetime-picker';
+// import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { FlatList } from 'react-native';
+import PhoneInput, {
+  isValidPhoneNumber,
+} from 'react-native-international-phone-number';
+import DateTimePicker from '@react-native-community/datetimepicker';
+
 
 const SignUpPage = () => {
   const { control, handleSubmit } = useForm();
@@ -64,6 +69,8 @@ const SignUpPage = () => {
     console.log(data);
   };
 
+  // const defaultStyles = getDefaultStyles();
+
   const genders = ['Male',"female","Others"]
   const states = [
     "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", 
@@ -88,7 +95,12 @@ const SignUpPage = () => {
   };
 
   const resetError = (field)=>{
-    setErrors((prevErrors) => ({ ...prevErrors, [field]: null }));
+    // if(field === 'mobileNumber' && !isValidPhoneNumber(control._formValues["mobileNumber"], countryCode)){
+    //   setErrors((prevErrors)=>({...prevErrors, [field]: "Please enter a valid mobile number"}))
+    // }
+    // else{
+      setErrors((prevErrors) => ({ ...prevErrors, [field]: null }));
+    // }
   }
 
 
@@ -181,7 +193,7 @@ const SignUpPage = () => {
                 >
                   <Text>{form.dateOfBirth.toDateString()}</Text>
                 </TouchableOpacity>
-                <DateTimePickerModal
+                {/* <DateTimePickerModal
                   isVisible={isFromDateVisible}
                   mode="date"
                   onConfirm={(selectedDate) => {
@@ -189,7 +201,33 @@ const SignUpPage = () => {
                     handleInputChange("dateOfBirth", selectedDate)
                   }}
                   onCancel={() => setIsFromDateVisible(false)}
+                /> */}
+                {/* <Modal visible={isFromDateVisible} style={{backgroundColor:Colors.primary, width:"50%", maxWidth:"50%", overflow: "hidden", height: 500}} animationType="slide">
+                <DateTimePicker
+                  mode="single"
+                  date={form.dateOfBirth}
+                  onChange={({ date }) => handleInputChange("dateOfBirth", date)}
+                  styles={{
+                    ...defaultStyles,
+                    // width:"50%",
+                    today: { borderColor: 'blue', borderWidth: 1 }, // Add a border to today's date
+                    selected: { backgroundColor: 'blue' }, // Highlight the selected day
+                    selected_label: { color: 'white' }, // Highlight the selected day label
+                  }}
                 />
+                </Modal> */}
+
+<Modal transparent visible={isFromDateVisible} animationType="slide">
+        <View style={styles.modalContainer}>
+            <DateTimePicker
+            value={form.dateOfBirth}
+            maximumDate={new Date(2019,0,1)}
+            mode="date"
+            display="default"
+            onChange={(event, selectedDate) => {handleInputChange("dateOfBirth", selectedDate || form.dateOfBirth); setIsFromDateVisible(false);}}
+            />
+        </View>
+      </Modal>
                   </>
           {errors.dateOfBirth && <Text style={styles.error}>{errors.dateOfBirth}</Text>}
         </View>
@@ -243,19 +281,15 @@ const SignUpPage = () => {
 
     <View style={{marginBottom: 10}}>
     <Text style={styles.label}>Mobile Number</Text>
-    <View style={[styles.inputContainer1, errors.mobileNumber && styles.errorInput]}>
-        <View style={styles.pickerContainer}>
-          {/* <RNPickerSelect
-            onValueChange={(value) => setCountryCode(value)}
-            items={[
-              { label: '+1', value: '+1' },
-              { label: '+91', value: '+91' },
-              { label: '+44', value: '+44' },
-            ]}
-            style={pickerSelectStyles}
-            value={countryCode}
-          /> */}
-        </View>
+    <View style={styles.inputContainer1}>
+        {/* <View style={styles.pickerContainer}>
+        //   <PhoneInput
+        //   value={value}
+        //   onChangePhoneNumber={(val)=>{onChange(val); resetError("mobileNumber") }}
+        //   selectedCountry={countryCode}
+        //   onChangeSelectedCountry={setCountryCode}
+        // />
+        // </View> */}
         <Controller
             control={control}
             rules={{
@@ -266,15 +300,32 @@ const SignUpPage = () => {
               },
             }}
             render={({ field: { onChange, onBlur, value } }) => (
-        <TextInput
-          // style={styles.mobileInput}
-          style={[styles.mobileInput, errors.mobileNumber && styles.errorInput]}
-          placeholder="Mobile Number"
-          keyboardType="phone-pad"
+              <PhoneInput
+              phoneInputStyles={{
+                container: {
+                  borderWidth: 1,
+                  borderStyle: 'solid',
+                  borderColor: errors.mobileNumber?'red':'#ddd',
+                }}}
           value={value}
-          onBlur={onBlur}
-          onChangeText={(val)=>{onChange(val); resetError("mobileNumber") }}
+          onChangePhoneNumber={(val)=>{onChange(val); resetError("mobileNumber") }}
+          selectedCountry={countryCode}
+          onChangeSelectedCountry={setCountryCode}
+          placeholder="Enter Mobile Number"
+      
+      onBlur={()=>{if(control._formValues["mobileNumber"] !=="" && !isValidPhoneNumber(control._formValues["mobileNumber"], countryCode)){setErrors((prevErrors)=>({...prevErrors, ["mobileNumber"]: "Please enter a valid mobile number"}))}}}
+          // showOnly={['BR', 'PT', 'CA', 'US']}
+          defaultCountry='US'
         />
+        // <TextInput
+        //   // style={styles.mobileInput}
+        //   style={[styles.mobileInput, errors.mobileNumber && styles.errorInput]}
+        //   placeholder="Mobile Number"
+        //   keyboardType="phone-pad"
+        //   value={value}
+        //   onBlur={onBlur}
+        //   onChangeText={(val)=>{onChange(val); resetError("mobileNumber") }}
+        // />
       )}
       name="mobileNumber"
       />
@@ -501,7 +552,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#fff',
     borderRadius: 10,
-    paddingHorizontal: 10,
+    // paddingHorizontal: 10,
     borderColor: '#ddd',
     borderWidth: 1,
 

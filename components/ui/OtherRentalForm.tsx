@@ -1,7 +1,8 @@
 import { Colors } from "@/constants/Colors";
 import React, { useState } from "react";
 import * as ImagePicker from 'expo-image-picker';
-import DateTimePickerModal from 'react-native-modal-datetime-picker';
+// import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 
 import { View, Text, TextInput, StyleSheet, Image, ScrollView, TouchableOpacity, CheckBox, Switch, Modal, FlatList, Alert  } from "react-native";
@@ -142,7 +143,18 @@ const OtherRentalForm = () => {
             >
               <Text>{form.keyDates.toDateString()}</Text>
             </TouchableOpacity>
-            <DateTimePickerModal
+            <Modal transparent visible={isFromDateVisible} animationType="slide">
+        <View style={styles.modalContainer}>
+            <DateTimePicker
+            value={form.keyDates}
+            minimumDate={new Date()}
+            mode="date"
+            display="default"
+            onChange={(event, selectedDate) => {setIsFromDateVisible(false); handleInputChange("keyDates", selectedDate || form.keyDates); }}
+            />
+        </View>
+      </Modal>
+            {/* <DateTimePickerModal
               isVisible={isFromDateVisible}
               mode="date"
               onConfirm={(selectedDate) => {
@@ -150,7 +162,7 @@ const OtherRentalForm = () => {
                 handleInputChange("keyDates", selectedDate)
               }}
               onCancel={() => setIsFromDateVisible(false)}
-            />
+            /> */}
               </>
 
 

@@ -13,7 +13,8 @@ import {
   Button,
   Modal,
 } from "react-native";
-import DateTimePickerModal from 'react-native-modal-dateti/me-picker';
+// import DateTimePickerModal from 'react-native-modal-dateti/me-picker';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import * as ImagePicker from 'expo-image-picker';
 import { Colors } from "@/constants/Colors";
 
@@ -140,7 +141,7 @@ const UtilityRental = () => {
 
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} nestedScrollEnabled={true}>
     
       {/* Title */}
       {/* <Text style={styles.label}>Title:</Text>
@@ -202,7 +203,18 @@ const UtilityRental = () => {
       >
         <Text>{fromDate.toDateString()}</Text>
       </TouchableOpacity>
-      <DateTimePickerModal
+      <Modal transparent visible={isFromDateVisible} animationType="slide">
+        <View style={styles.modalContainer}>
+            <DateTimePicker
+            value={fromDate}
+            maximumDate={toDate}
+            mode="date"
+            display="default"
+            onChange={(event, selectedDate) => {setIsFromDateVisible(false); setFromDate(selectedDate || fromDate ); }}
+            />
+        </View>
+      </Modal>
+      {/* <DateTimePickerModal
         isVisible={isFromDateVisible}
         mode="date"
         onConfirm={(selectedDate) => {
@@ -211,7 +223,7 @@ const UtilityRental = () => {
           setFromDate(selectedDate);
         }}
         onCancel={() => setIsFromDateVisible(false)}
-      />
+      /> */}
         </>
         </View>
 
@@ -230,7 +242,18 @@ const UtilityRental = () => {
       >
         <Text>{toDate.toDateString()}</Text>
       </TouchableOpacity>
-      <DateTimePickerModal
+      <Modal transparent visible={isToDateVisible} animationType="slide">
+        <View style={styles.modalContainer}>
+            <DateTimePicker
+            value={toDate}
+            minimumDate={fromDate}
+            mode="date"
+            display="default"
+            onChange={(event, selectedDate) => {setIsToDateVisible(false); setToDate(selectedDate || toDate ); }}
+            />
+        </View>
+      </Modal>
+      {/* <DateTimePickerModal
         isVisible={isToDateVisible}
         mode="date"
         onConfirm={(selectedDate) => {
@@ -240,7 +263,7 @@ const UtilityRental = () => {
           }
         }}
         onCancel={() => setIsToDateVisible(false)}
-      />
+      /> */}
         </>
         </View>
       </View>

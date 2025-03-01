@@ -1,11 +1,12 @@
 import { Colors } from "@/constants/Colors";
 import React, { useEffect, useState } from "react";
 import { View, Text, TextInput, StyleSheet, Image, ScrollView, TouchableOpacity, CheckBox, Switch, Modal, FlatList, Animated } from "react-native";
-import DateTimePickerModal from 'react-native-modal-datetime-picker';
+// import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import * as ImagePicker from 'expo-image-picker';
 import { Alert } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { setRentalType } from "@/app/rentalSlice";
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 // "@react-native-community/datetimepicker": "^8.2.0",
     // "react-native-date-picker": "^5.0.9",
@@ -98,7 +99,7 @@ const HomeRentalForm = () => {
   const handleInputChange = (field, value) => {
     setForm({ ...form, [field]: value });
     console.log("values",field, value)
-    dispatch(setRentalType(value))
+    // dispatch(setRentalType(value))
     if (field !=="petFriendly" && field !=="doYouSmoke"  && field !=="parking" && value.trim() !== "") {
       setErrors((prevErrors) => ({ ...prevErrors, [field]: null }));
     }
@@ -344,7 +345,18 @@ const HomeRentalForm = () => {
       >
         <Text>{form.availableFrom.toDateString()}</Text>
       </TouchableOpacity>
-      <DateTimePickerModal
+      <Modal transparent visible={isFromDateVisible} animationType="slide">
+        <View style={styles.modalContainer}>
+            <DateTimePicker
+            value={form.availableFrom}
+            minimumDate={new Date()}
+            mode="date"
+            display="default"
+            onChange={(event, selectedDate) => {setIsFromDateVisible(false); handleInputChange("availableFrom", selectedDate || form.availableFrom); }}
+            />
+        </View>
+      </Modal>
+      {/* <DateTimePickerModal
         isVisible={isFromDateVisible}
         mode="date"
         onConfirm={(selectedDate) => {
@@ -352,7 +364,7 @@ const HomeRentalForm = () => {
           handleInputChange("availableFrom", selectedDate)
         }}
         onCancel={() => setIsFromDateVisible(false)}
-      />
+      /> */}
         </>
         </View>
 
