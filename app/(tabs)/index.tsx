@@ -1,4 +1,5 @@
 import renderCard from '@/components/ui/CardRenderer';
+import CategoryTabs from '@/components/ui/FilterTab';
 import { Colors } from '@/constants/Colors';
 import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useRef, useState } from 'react';
@@ -56,6 +57,8 @@ export default function HomeScreen() {
 
 
   return (
+    <View style={{backgroundColor: Colors.secondary}}>
+    <CategoryTabs></CategoryTabs>
     <ScrollView style={styles.homeContainer}>
    <View style={styles.container}>
     <Text style={styles.title}>Top Stories</Text>
@@ -97,13 +100,15 @@ export default function HomeScreen() {
         renderItem={renderCards}
         keyExtractor={(item) => item.id}
         horizontal
-        showsHorizontalScrollIndicator={false}
+        showsHorizontalScrollIndicator={true}
         snapToAlignment="center"
         decelerationRate="fast"
         pagingEnabled
-        contentContainerStyle={{
-          paddingHorizontal: (windowWidth - cardWidth) / 2, // Center-align the cards
-        }}
+        // contentContainerStyle={{
+        //   paddingHorizontal: (windowWidth - cardWidth) / 2, // Center-align the cards
+        // }}
+        contentContainerStyle={{ marginLeft: -2 }}
+        // viewabilityConfig={viewabilityConfig}
       />
        {/* <View style={styles.dotsContainer}>
         {data.map((_, index) => (
@@ -131,9 +136,7 @@ export default function HomeScreen() {
         snapToAlignment="center"
         decelerationRate="fast"
         pagingEnabled
-        contentContainerStyle={{
-          paddingHorizontal: (windowWidth - cardWidth) / 2, // Center-align the cards
-        }}
+        contentContainerStyle={{ marginLeft: -2 }} 
       />
        {/* <View style={styles.dotsContainer}>
         {data.map((_, index) => (
@@ -150,13 +153,14 @@ export default function HomeScreen() {
 
     
   </ScrollView>
+  </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    width: Dimensions.get('window').width * 0.95, // 95% of screen width
-    marginHorizontal: 10,
+    width: Dimensions.get('window').width * 0.98, // 95% of screen width
+    marginHorizontal: 5,
     paddingVertical: 5,
     paddingHorizontal: 5,
     backgroundColor: '#fff',

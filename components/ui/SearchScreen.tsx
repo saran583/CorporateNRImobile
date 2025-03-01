@@ -12,6 +12,7 @@ import { Colors } from "@/constants/Colors";
 import renderCard from "./CardRenderer";
 import { useNavigation } from "@react-navigation/native";
 import { Dimensions } from "react-native";
+import CategoryTabs from "./FilterTab";
 
 const DATA = [
   { id: "1", name: "3bhk Villa for Sale ", type: "Rentals", price: 200000 },
@@ -71,7 +72,7 @@ export default function SearchComponent() {
      //{ /* <Text style={styles.cardTitle}>{item.text}</Text> */ }
      //{ /* <CardLayout title="Villa for Sale" price="$35000" location="texas" features={["pool", "parking", "Gym", "SPA"]} /> */}
       
-       renderCard(navigation, item.name, item.price, "Texas, USA", ["Gym", "Parking", "ClubHouse"],  Dimensions.get('window').width * 0.93)
+       renderCard(navigation, item.name, item.price, "search", ["Gym", "Parking", "ClubHouse"],  Dimensions.get('window').width * 0.97)
      
   //</View>
    );
@@ -90,13 +91,14 @@ export default function SearchComponent() {
           style={styles.filterButton}
           onPress={handleSearch}
         ><Text style={{color:'#fff'}}>Search</Text></TouchableOpacity>
-        <TouchableOpacity
+        {/* <TouchableOpacity
           style={styles.filterButton}
           onPress={() => setDropdownVisible(!dropdownVisible)}
         >
           <FontAwesome name="filter" size={20} color="#fff" />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
+      
 
       {/* Dropdown Filter */}
       {dropdownVisible && (
@@ -127,11 +129,16 @@ export default function SearchComponent() {
       )}
 
       {/* Cards List */}
+      {/* <View> */}
+        <View style={{backgroundColor: Colors.secondary, paddingBottom:10}}>
+        <CategoryTabs></CategoryTabs>
+        </View>
       <FlatList
         data={filteredData}
         keyExtractor={(item) => item.id}
         renderItem={(item) =>renderCards(item)}
       />
+      {/* </View> */}
     </View>
   );
 }

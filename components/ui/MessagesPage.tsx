@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: '#fff',
     borderRadius: 25,
-    marginHorizontal: '20%',
+    marginHorizontal: '23%',
     elevation: 3,
     shadowColor: '#000',
     shadowOpacity: 0.1,
@@ -101,14 +101,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     // fontWeight: 'bold',
     color: '#999',
-    padding: 10
+    padding: 5
 
   },
   activeTabText: {
     color: Colors.secondary,
     backgroundColor: Colors.primary,
     borderRadius: 25,
-    padding: 10
+    padding: 5
   },
   indicator: {
     position: 'absolute',

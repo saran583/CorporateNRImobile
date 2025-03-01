@@ -2,41 +2,47 @@ import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
 import renderCard from './CardRenderer';
 import { useNavigation } from '@react-navigation/native';
+import CategoryTabs from './FilterTab';
+import { Colors } from '@/constants/Colors';
 
 const CardLayout = () => {
   // console.log("navigation",navigation)
   const navigation = useNavigation()
   return (
+    <View style={{backgroundColor: Colors.secondary, height: "100%", paddingBottom:10}}>
+    <CategoryTabs></CategoryTabs>
     <ScrollView style={styles.container}>
       {/* <Text style={styles.sectionTitle}>Top Stories</Text> */}
-      {renderCard(navigation,"3bhk Villa For Sale test", "30000", "Texas, USA", ["Gym", "Parking", "ClubHouse"], Dimensions.get('window').width * 0.93)}
+      {renderCard(navigation,"3bhk Villa For Sale test", "30000", "Texas, USA", ["Gym", "Parking", "ClubHouse"], Dimensions.get('window').width *0.97)}
       
       {/* <Text style={styles.sectionTitle}>Latest Posts</Text> */}
-      {renderCard(navigation,"3bhk Villa For Sale", "30000", "Texas, USA", ["Gym", "Parking", "ClubHouse"], Dimensions.get('window').width * 0.93)}
+      {renderCard(navigation,"3bhk Villa For Sale", "30000", "Texas, USA", ["Gym", "Parking", "ClubHouse"], Dimensions.get('window').width * 0.97)}
       
       {/* <Text style={styles.sectionTitle}>Featured Posts</Text> */}
-      {renderCard(navigation,"3bhk Villa For Sale", "30000", "Texas, USA", ["Gym", "Parking", "ClubHouse"], Dimensions.get('window').width * 0.93)}
+      {renderCard(navigation,"3bhk Villa For Sale", "30000", "Texas, USA", ["Gym", "Parking", "ClubHouse"], Dimensions.get('window').width * 0.97)}
 
-      {renderCard(navigation,"3bhk Villa For Sale", "30000", "Texas, USA", ["Gym", "Parking", "ClubHouse"], Dimensions.get('window').width * 0.93)}
+      {renderCard(navigation,"3bhk Villa For Sale", "30000", "Texas, USA", ["Gym", "Parking", "ClubHouse"], Dimensions.get('window').width * 0.97)}
 
-      {renderCard(navigation,"3bhk Villa For Sale", "30000", "Texas, USA", ["Gym", "Parking", "ClubHouse"], Dimensions.get('window').width * 0.93)}
+      {renderCard(navigation,"3bhk Villa For Sale", "30000", "Texas, USA", ["Gym", "Parking", "ClubHouse"], Dimensions.get('window').width * 0.97)}
 
-      {renderCard(navigation,"3bhk Villa For Sale", "30000", "Texas, USA", ["Gym", "Parking", "ClubHouse"], Dimensions.get('window').width * 0.93)}
+      {renderCard(navigation,"3bhk Villa For Sale", "30000", "Texas, USA", ["Gym", "Parking", "ClubHouse"], Dimensions.get('window').width * 0.97)}
       
-      {renderCard(navigation,"3bhk Villa For Sale", "30000", "Texas, USA", ["Gym", "Parking", "ClubHouse"], Dimensions.get('window').width * 0.93)}
+      {renderCard(navigation,"3bhk Villa For Sale", "30000", "Texas, USA", ["Gym", "Parking", "ClubHouse"], Dimensions.get('window').width * 0.97)}
 
-{renderCard(navigation,"3bhk Villa For Sale", "30000", "Texas, USA", ["Gym", "Parking", "ClubHouse"], Dimensions.get('window').width * 0.93)}
+{renderCard(navigation,"3bhk Villa For Sale", "30000", "Texas, USA", ["Gym", "Parking", "ClubHouse"], Dimensions.get('window').width * 0.97)}
 
     </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    // flex: 1,
     backgroundColor: '#f0f8ff',
-    paddingHorizontal: 10,
-    paddingLeft: 5
+    paddingTop:1
+    // paddingHorizontal: 10,
+    // paddingLeft: 5
     // justifyContent: 'space-around'
   },
   sectionTitle: {
