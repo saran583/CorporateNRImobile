@@ -12,7 +12,7 @@ import {
 import * as ImagePicker from 'expo-image-picker';
 
 
-const ProfileScreen = () => {
+const ProfileScreen = ({navigation}) => {
   const [profileData, setProfileData] = useState({
     firstName: "John",
     lastName: "Doe",
@@ -196,6 +196,13 @@ const ProfileScreen = () => {
           <Text style={styles.buttonText}>History</Text>
         </TouchableOpacity>
       </View>
+
+      <TouchableOpacity style={{...styles.button,marginTop:25, marginHorizontal:"20%", backgroundColor:"#E2062B"}} onPress={()=>{ navigation.reset({
+            index: 0,
+            routes: [{ name: 'Login' }]
+        });}}>
+          <Text style={{...styles.buttonText,width:"auto", margin:"auto"}}>LogOut</Text>
+        </TouchableOpacity>
 
       {/* Submit Button */}
       {Object.values(editFields).includes(true) && (

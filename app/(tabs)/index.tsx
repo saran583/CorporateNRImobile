@@ -27,7 +27,15 @@ export default function HomeScreen() {
     //{ /* <Text style={styles.cardTitle}>{item.text}</Text> */ }
     //{ /* <CardLayout title="Villa for Sale" price="$35000" location="texas" features={["pool", "parking", "Gym", "SPA"]} /> */}
      
-      renderCard(navigation, "3bhk Villa For Sale", "30000", "Texas, USA", ["Gym", "Parking", "ClubHouse"])
+      renderCard(navigation, {
+        title:"3bhk Villa For Sale test", 
+        price:"$30000", 
+        location:"Texas, USA", 
+        amenities:["Gym", "Parking", "ClubHouse"],
+        postedBy:"john Doe",
+        createdAt: "10 mins ago",
+        images: ["https://corporatenriappimages.s3.amazonaws.com/uploads/1741710437228-house.jpg"] 
+      })
     
  //</View>
   );

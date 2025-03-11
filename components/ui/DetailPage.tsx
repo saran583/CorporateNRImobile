@@ -1,17 +1,30 @@
 import { Colors } from "@/constants/Colors";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, Image, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
+import SkeletonLoader from "./SkeletonLoader";
 
 const PropertyDetails = ({route}) => {
   console.log(route)
-  const images = {
-    0:require("../../assets/images/house.jpg"),1:require("../../assets/images/house2.jpg"),2:require("../../assets/images/house3.jpg"),3:require("../../assets/images/house4.jpg"),4:require("../../assets/images/house5.jpg")
-  };
+  let post = route.params
+  const [postDetail, setPostDetail] = useState({})
+  const [loading, setLoading] = useState(true)
 
-  const [mainImage, setMainImage] = useState(images[0]);
+  const getPost = async () =>{
+    let response = await fetch("https://my9ivim6h2.execute-api.us-east-1.amazonaws.com/default/getListings?"+post.id)
+    const postResponse = await response.json();
+    console.log("response",postResponse)
+    setPostDetail(postResponse[0]);
+    setLoading(false)
+  }
+
+  const [mainImage, setMainImage] = useState(post.images[0]);
+
+  useEffect(()=>{
+    getPost();
+  },[])
 
   const propertyDetails = {
-    title: "Luxury 2BHK Apartment",
+    title: "Luxury 2BHK Apartmentsdfg",
     location: "Downtown, New York",
     category: "Rental",
     price: "$2500/month",
@@ -36,47 +49,49 @@ const PropertyDetails = ({route}) => {
   return (
     <ScrollView style={styles.container}>
       {/* Main Image */}
-      <Image source={mainImage} style={styles.mainImage} />
+      <Image source={{uri: mainImage}} style={styles.mainImage} />
 
       {/* Horizontal ScrollView for Thumbnails */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.imageScroll}>
-        {Object.keys(images).map((img, index) => (
-          <TouchableOpacity key={index} onPress={() => setMainImage(images[index])}>
-            <Image source={images[index]} style={styles.thumbnail} />
+        {post.images.map((img, index) => (
+          <TouchableOpacity key={index} onPress={() => setMainImage(img)}>
+            <Image source={{uri:img}} style={styles.thumbnail} />
           </TouchableOpacity>
         ))}
       </ScrollView>
 
       {/* Property Details */}
       <View style={styles.detailsContainer}>
-        <Text style={styles.title}>{propertyDetails.title}</Text>
-        <Text style={styles.location}>{propertyDetails.location}</Text>
+        <Text style={styles.title}>{post.title}</Text>
+        <Text style={styles.location}>{post.location+","+postDetail.city}</Text>
 
         {/* Property Info */}
-        <View style={styles.infoContainer}>
-          <InfoItem label="Category" value={propertyDetails.category} />
-          <InfoItem label="Price" value={propertyDetails.price} />
-          <InfoItem label="Bedrooms" value={propertyDetails.bedrooms} />
-          <InfoItem label="Bathrooms" value={propertyDetails.bathrooms} />
-          <InfoItem label="Size" value={propertyDetails.size} />
-          <InfoItem label="Deposit" value={propertyDetails.deposit} />
-          <InfoItem label="Available From" value={propertyDetails.availableFrom} />
-          <InfoItem label="Rental Duration" value={propertyDetails.rentalDuration} />
-          <InfoItem label="Rental Type" value={propertyDetails.rentalType} />
-          <InfoItem label="Pet Allowed?" value={propertyDetails.petAllowed} />
-          <InfoItem label="Smoking Allowed?" value={propertyDetails.smokingAllowed} />
-          <InfoItem label="Food Preference" value={propertyDetails.foodPreference} />
-          <InfoItem label="Parking" value={propertyDetails.parking} />
-          <InfoItem label="Nearby Groceries" value={propertyDetails.groceries} />
-          <InfoItem label="Bus Connectivity" value={propertyDetails.busConnectivity} />
-          <InfoItem label="Corporate Hubs" value={propertyDetails.corporateHubs} />
-          <InfoItem label="Preferred Gender" value={propertyDetails.preferredGender} />
-        </View>
+        {loading?<SkeletonLoader width={"100%"} height={500}></SkeletonLoader>:<View style={styles.infoContainer}>
+          <InfoItem label="Category" value={post.listingCategory} />
+          <InfoItem label="Price" value={post.listingCategory==="Sale"?post.price:post.price+"/monthly"} />
+          {postDetail.listing_category==="Sale"&&<InfoItem label="Advance" value={postDetail.advance} />}
+          <InfoItem label="Pincode" value={postDetail.pincode} />
+          <InfoItem label="Bedrooms" value={postDetail.bedrooms} />
+          <InfoItem label="Bathrooms" value={postDetail.bathrooms} />
+          <InfoItem label="Size" value={postDetail.square_feet} />
+          <InfoItem label="Deposit" value={postDetail.deposit} />
+          <InfoItem label="Available From" value={postDetail.available_from} />
+          {postDetail.listing_category==="Rent"&&<InfoItem label="Rental Duration" value={postDetail.rental_duration} />}
+          {postDetail.listing_category==="Rent"&&<InfoItem label="Rental Type" value={postDetail.rental_type} />}
+          <InfoItem label="Pet Allowed?" value={postDetail.pets_allowed==1?"Yes":"No"} />
+          <InfoItem label="Smoking Allowed?" value={postDetail.smoking_allowed==1?"Yes":"No"} />
+          {postDetail.listing_category==="Rent"&&<InfoItem label="Food Preference" value={postDetail.food_preference} />}
+          <InfoItem label="Parking" value={postDetail.is_parking_available==1?"Yes":"No"} />
+          <InfoItem label="Nearby Groceries" value={postDetail.nearby_groceries} />
+          <InfoItem label="Bus Connectivity" value={postDetail.bus_connectivity} />
+          {postDetail.listing_category==="Rent"&&<InfoItem label="Preferred Gender" value={postDetail.preferred_gender} />}
+          <InfoItem label="Additional Details" value={postDetail.additional_detail+" "+postDetail.additional_detail+" "+postDetail.additional_detail+" "+postDetail.additional_detail+" "+postDetail.additional_detail} />
+        </View>}
 
         {/* Amenities */}
         <Text style={styles.sectionTitle}>Amenities</Text>
         <View style={styles.amenitiesContainer}>
-          {propertyDetails.amenities.map((amenity, index) => (
+          {post.amenities.map((amenity, index) => (
             <Text key={index} style={styles.amenity}>{amenity}</Text>
           ))}
         </View>
@@ -157,6 +172,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
     color: "#222",
+    flexShrink: 1,
+    textAlign: "right"
   },
   sectionTitle: {
     fontSize: 18,

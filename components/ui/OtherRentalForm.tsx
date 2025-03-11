@@ -1,27 +1,37 @@
 import { Colors } from "@/constants/Colors";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import * as ImagePicker from 'expo-image-picker';
 // import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 
-import { View, Text, TextInput, StyleSheet, Image, ScrollView, TouchableOpacity, CheckBox, Switch, Modal, FlatList, Alert  } from "react-native";
+import { View, Text, TextInput, StyleSheet, Image, ScrollView, TouchableOpacity, CheckBox, Switch, Modal, FlatList, Alert, Platform  } from "react-native";
+import { ToastAndroid,AlertIOS } from "react-native";
+import { useSelector } from "react-redux";
+import { ActivityIndicator } from "react-native";
 
 const OtherRentalForm = () => {
     const [form, setForm] = useState({
       title: "",
       details: "",
-      keyDates: new Date(),
-      additionalDetails: "",
-      category: ""
+      keyDate: new Date(),
+      additionalInformation: "",
+      listingCategory: ""
     });
   
     const [errors, setErrors] = useState({});
     const [modalVisible, setModalVisible] = useState(false);
     const [pictures, setPictures] = useState([]);
     const [isFromDateVisible, setIsFromDateVisible] = useState(false);
+    const [loading, setLoading] = useState(false);
+    
 
     const [image, setImage] = useState(null);
+
+    const userId = useSelector((state) => state.rental.userId);
+  useEffect(()=>{
+    console.log("userID", userId)
+  },[userId])
     
     const categories = ["Travel Companion", "Cars", "Medical Support", "Community", "Vouchers or Offers", "Others"];
     const blurhash =
@@ -58,6 +68,7 @@ const OtherRentalForm = () => {
       mediaTypes: ["images"],
       allowsEditing: true,
       aspect: [4, 3],
+      base64: true,
       quality: 1,
     });
 
@@ -71,12 +82,15 @@ const OtherRentalForm = () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
       allowsEditing: true,
+      base64: true,
       allowsMultipleSelection: true,
       aspect: [4, 3],
       quality: 1,
     });
 
     if (!result.canceled) {
+      // console.log("image result", result)
+      console.log(result.assets["0"].mimeType)
           setPictures(result.assets);
         }
   };
@@ -91,10 +105,10 @@ const OtherRentalForm = () => {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const newErrors = {};
     Object.keys(form).forEach((key) => {
-      if (key !== "additionalDetails" && form[key].toString().trim() === "") {
+      if (key !== "additionalInformation" && form[key].toString().trim() === "") {
         console.log("error", key)
         newErrors[key] = "This field is required";
       }
@@ -104,11 +118,50 @@ const OtherRentalForm = () => {
 
     if (Object.keys(newErrors).length === 0) {
       console.log("Form Submitted:", form);
+      const base64Images = pictures.map((picture)=>{
+        return {base64:"data:image/jpeg;base64,"+picture.base64, fileName:picture.fileName}
+      })
+      setLoading(true)
+
+      const response = await fetch('https://my9ivim6h2.execute-api.us-east-1.amazonaws.com/default/createOtherListing', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ categoryId:3, createdBy: userId, ...form, pictures:base64Images}),
+            });
+      
+            const data = await response.json();
+            console.log(data)
+            if(data.message){
+              if (Platform.OS === 'android') {
+                ToastAndroid.show(data.message, ToastAndroid.SHORT)
+              } else {
+                AlertIOS.alert(data.message);
+              }
+              setForm({
+                title: "",
+                details: "",
+                keyDate: new Date(),
+                additionalInformation: "",
+                listingCategory: ""
+              })
+            }
+            setLoading(false)
+
     }
   };
   
     return (
         <ScrollView contentContainerStyle={styles.container}>
+           <Modal visible={loading} transparent>
+                          <View style={styles.overlay}>
+                            <View style={styles.loaderContainer}>
+                              <ActivityIndicator size="large" color="#fff" />
+                              <Text style={styles.text}>Loading, please wait...</Text>
+                            </View>
+                          </View>
+                        </Modal>
       <Text style={styles.label}>Title</Text>
       <TextInput
         style={[styles.input, errors.title && styles.errorInput]}
@@ -119,12 +172,12 @@ const OtherRentalForm = () => {
       {errors.title && <Text style={styles.errorText}>{errors.title}</Text>}
 
       <Text style={styles.label}>Category</Text>
-      <TouchableOpacity style={[styles.input, errors.category && styles.errorInput]} onPress={() => setModalVisible(true)}>
-        <Text style={form.category ? styles.textSelected : styles.textPlaceholder}>
-          {form.category || "Select Category"}
+      <TouchableOpacity style={[styles.input, errors.listingCategory && styles.errorInput]} onPress={() => setModalVisible(true)}>
+        <Text style={form.listingCategory ? styles.textSelected : styles.textPlaceholder}>
+          {form.listingCategory || "Select Category"}
         </Text>
       </TouchableOpacity>
-      {errors.category && <Text style={styles.errorText}>{errors.category}</Text>}
+      {errors.listingCategory && <Text style={styles.errorText}>{errors.listingCategory}</Text>}
 
       
 
@@ -141,16 +194,16 @@ const OtherRentalForm = () => {
                 backgroundColor: "#fff"
               }}
             >
-              <Text>{form.keyDates.toDateString()}</Text>
+              <Text>{form.keyDate.toDateString()}</Text>
             </TouchableOpacity>
             <Modal transparent visible={isFromDateVisible} animationType="slide">
         <View style={styles.modalContainer}>
             <DateTimePicker
-            value={form.keyDates}
+            value={form.keyDate}
             minimumDate={new Date()}
             mode="date"
             display="default"
-            onChange={(event, selectedDate) => {setIsFromDateVisible(false); handleInputChange("keyDates", selectedDate || form.keyDates); }}
+            onChange={(event, selectedDate) => {setIsFromDateVisible(false); handleInputChange("keyDate", selectedDate || form.keyDate); }}
             />
         </View>
       </Modal>
@@ -159,7 +212,7 @@ const OtherRentalForm = () => {
               mode="date"
               onConfirm={(selectedDate) => {
                 setIsFromDateVisible(false);
-                handleInputChange("keyDates", selectedDate)
+                handleInputChange("keyDate", selectedDate)
               }}
               onCancel={() => setIsFromDateVisible(false)}
             /> */}
@@ -181,7 +234,7 @@ const OtherRentalForm = () => {
                 <TouchableOpacity
                   style={styles.item}
                   onPress={() => {
-                    handleInputChange("category", item)
+                    handleInputChange("listingCategory", item)
                     setModalVisible(false);
                   }}
                 >
@@ -197,7 +250,7 @@ const OtherRentalForm = () => {
       <TextInput
         style={[[styles.input, styles.textarea], errors.details && styles.errorInput]}
         value={form.details}
-        onChangeText={(text) => handleInputChange("subject", text)}
+        onChangeText={(text) => handleInputChange("details", text)}
         placeholder="Enter Details"
         multiline
       />
@@ -206,8 +259,8 @@ const OtherRentalForm = () => {
       <Text style={styles.label}>Additional Information</Text>
       <TextInput
         style={[styles.input, styles.textarea]}
-        value={form.additionalDetails}
-        onChangeText={(text) => handleInputChange("additionalDetails", text)}
+        value={form.additionalInformation}
+        onChangeText={(text) => handleInputChange("additionalInformation", text)}
         placeholder="Enter additional information"
         multiline
       />
@@ -378,6 +431,22 @@ const OtherRentalForm = () => {
     width: 60,
     height: 60,
     margin: "auto",
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)', // Dark semi-transparent background
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loaderContainer: {
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  text: {
+    color: '#fff',
+    marginTop: 10,
+    fontSize: 16,
   },
   });
   

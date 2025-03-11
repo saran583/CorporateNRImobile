@@ -54,10 +54,8 @@ const LoginScreen = ({ navigation }) => {
   const handleLogin = async () => {
     if (!validateInputs()) return;
 
-    navigation.replace("Home");
-
     try {
-      const response = await fetch('https://example.com/api/login', {
+      const response = await fetch('https://my9ivim6h2.execute-api.us-east-1.amazonaws.com/default/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -66,7 +64,7 @@ const LoginScreen = ({ navigation }) => {
       });
 
       const data = await response.json();
-
+      console.log(data)
       if (response.ok) {
         setApiError('');
         // Navigate to another screen on successful login

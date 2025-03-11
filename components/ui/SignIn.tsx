@@ -1,4 +1,7 @@
+import { setUserId } from "@/app/rentalSlice";
+import { Colors } from "@/constants/Colors";
 import React, { useState } from "react";
+import { ActivityIndicator, Modal } from "react-native";
 import {
   View,
   Text,
@@ -7,6 +10,7 @@ import {
   StyleSheet,
   Dimensions,
 } from "react-native";
+import { useDispatch } from "react-redux";
 
 const { width, height } = Dimensions.get("window");
 
@@ -16,6 +20,8 @@ const SignInScreen = ({navigation}) => {
    const [emailError, setEmailError] = useState('');
    const [passwordError, setPasswordError] = useState('');
    const [apiError, setApiError] = useState('');
+   const dispatch = useDispatch()
+   const [loading, setLoading] = useState(false);
  
    // Function to validate inputs
    const validateInputs = () => {
@@ -53,29 +59,41 @@ const SignInScreen = ({navigation}) => {
  
    // Function to handle login API call
    const handleLogin = async () => {
+    // navigation.navigate('Home');
+
      if (!validateInputs()) return;
  
-     navigation.replace("Home");
+    //  navigation.replace("Home");
  
      try {
-       const response = await fetch('https://example.com/api/login', {
-         method: 'POST',
-         headers: {
-           'Content-Type': 'application/json',
-         },
-         body: JSON.stringify({ email, password }),
-       });
- 
-       const data = await response.json();
- 
-       if (response.ok) {
-         setApiError('');
-         // Navigate to another screen on successful login
-         navigation.navigate('Home');
-       } else {
-         setApiError(data.message || 'Invalid credentials.');
-       }
+      setLoading(true);
+      const response = await fetch('https://my9ivim6h2.execute-api.us-east-1.amazonaws.com/default/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+      console.log(data)
+      if (response.ok) {
+        setApiError('');
+        setLoading(false)
+        dispatch(setUserId(data.userId))
+        
+        // Navigate to another screen on successful login
+        // navigation.navigate('Home');
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Home' }]
+      });
+      } else {
+        setLoading(false)
+        setApiError(data.message || 'Invalid credentials.');
+      }
      } catch (error) {
+      setLoading(false)
        setApiError('Something went wrong. Please try again.');
      }
    };
@@ -83,6 +101,14 @@ const SignInScreen = ({navigation}) => {
 
   return (
     <View style={styles.container}>
+       <Modal visible={loading} transparent>
+        <View style={styles.overlay}>
+          <View style={styles.loaderContainer}>
+            <ActivityIndicator size="large" color="#fff" />
+            <Text style={styles.text}>Loading, please wait...</Text>
+          </View>
+        </View>
+      </Modal>
       {/* Header Section */}
       <View style={styles.header}>
         <Text style={styles.title}>Welcome to Corporate NRI</Text>
@@ -266,6 +292,22 @@ const styles = StyleSheet.create({
   badgeText: {
     color: "#fff",
     fontSize: 14,
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)', // Dark semi-transparent background
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loaderContainer: {
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  text: {
+    color: '#fff',
+    marginTop: 10,
+    fontSize: 16,
   },
 });
 

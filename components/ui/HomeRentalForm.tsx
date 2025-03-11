@@ -1,6 +1,6 @@
 import { Colors } from "@/constants/Colors";
 import React, { useEffect, useState } from "react";
-import { View, Text, TextInput, StyleSheet, Image, ScrollView, TouchableOpacity, CheckBox, Switch, Modal, FlatList, Animated } from "react-native";
+import { View, Text, TextInput, StyleSheet, Image, ScrollView, TouchableOpacity, CheckBox, Switch, Modal, FlatList, Animated, Platform, ToastAndroid, AlertIOS, ActivityIndicator } from "react-native";
 // import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import * as ImagePicker from 'expo-image-picker';
 import { Alert } from "react-native";
@@ -17,14 +17,14 @@ const HomeRentalForm = () => {
       location: "",
       pinCode: "",
       monthlyRent: "",
-      bedrooms: "",
+      bedRooms: "",
       squareFeet: "",
       deposit: "",
-      petFriendly: false,
-      doYouSmoke: false,
-      features: "",
+      petsAllowed: false,
+      smokingAllowed: false,
+      Amenities: "",
       additionalDetails: "",
-      category: "Rent",
+      listingCategory: "Rent",
       availableFrom: new Date(),
       rentalDuration: "",
       nearByGroceries: "",
@@ -41,11 +41,10 @@ const HomeRentalForm = () => {
       pictures: []
     });
 
-    const dispatch = useDispatch();
-  const rentalType = useSelector((state) => state.rental.rentalType);
+  const userId = useSelector((state) => state.rental.userId);
   useEffect(()=>{
-    console.log("rental", rentalType)
-  },[rentalType])
+    console.log("userID", userId)
+  },[userId])
   
     const [errors, setErrors] = useState({});
     const [modalVisible, setModalVisible] = useState(false);
@@ -53,6 +52,8 @@ const HomeRentalForm = () => {
     const [isFromDateVisible, setIsFromDateVisible] = useState(false);
     const [isPreferredFoodVisible, setIsPreferredFoodVisible] = useState(false);
     const [isPrefferedGenderVisible, setIsPrefferedGenderVisible] = useState(false);
+    const [loading, setLoading] = useState(false);
+    
 
     // const [pictures, setPictures] = useState([]);
     const blurhash =
@@ -72,6 +73,7 @@ const HomeRentalForm = () => {
         mediaTypes: ["images"],
         allowsEditing: true,
         aspect: [4, 3],
+        base64: true,
         quality: 1,
       });
   
@@ -86,6 +88,7 @@ const HomeRentalForm = () => {
         mediaTypes: ["images"],
         allowsEditing: true,
         allowsMultipleSelection: true,
+        base64: true,
         aspect: [4, 3],
         quality: 1,
       });
@@ -100,7 +103,7 @@ const HomeRentalForm = () => {
     setForm({ ...form, [field]: value });
     console.log("values",field, value)
     // dispatch(setRentalType(value))
-    if (field !=="petFriendly" && field !=="doYouSmoke"  && field !=="parking" && value.trim() !== "") {
+    if (field !=="petsAllowed" && field !=="smokingAllowed"  && field !=="parking" && value.trim() !== "") {
       setErrors((prevErrors) => ({ ...prevErrors, [field]: null }));
     }
   };
@@ -111,12 +114,12 @@ const HomeRentalForm = () => {
   const durations = ["days","months", "Years"]
 
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const newErrors = {};
-    let nonValidationKeys = ["additionalDetails", "petFriendly", "doYouSmoke"]
+    let nonValidationKeys = ["additionalDetails", "petsAllowed", "smokingAllowed"]
     let rentalKeys = ["monthlyRent", "deposit", "rentalDuration", "duration", "preferredGender", "foodPreference","rentalType"]
     let saleKeys = ["salePrice", "advance"]
-    let skipableKeys = [...nonValidationKeys, ...form.category==="Rent"?saleKeys:rentalKeys]
+    let skipableKeys = [...nonValidationKeys, ...form.listingCategory==="Rent"?saleKeys:rentalKeys]
     Object.keys(form).forEach((key) => {
       if (skipableKeys.includes(key)==false && form[key].toString().trim() === "") {
         newErrors[key] = "This field is required";
@@ -127,6 +130,58 @@ const HomeRentalForm = () => {
 
     if (Object.keys(newErrors).length === 0) {
       console.log("Form Submitted:", form);
+      
+      const base64Images = form.pictures.map((picture)=>{
+        return {base64:"data:image/jpeg;base64,"+picture.base64, fileName:picture.fileName}
+      })
+      setLoading(true);
+      const response = await fetch('https://my9ivim6h2.execute-api.us-east-1.amazonaws.com/default/createRental', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ title:"House for "+form.listingCategory, categoryId:1, createdBy: userId, ...form, rentalDuration: form.rentalDuration +" "+form.duration, pictures:base64Images}),
+      });
+
+      const data = await response.json();
+      console.log(data)
+      if(data.message){
+        if (Platform.OS === 'android') {
+          ToastAndroid.show("Rental created Successfully", ToastAndroid.SHORT)
+        } else {
+          AlertIOS.alert("Rental created Successfully");
+        }
+        setForm({
+          // title: "",
+          location: "",
+          pinCode: "",
+          monthlyRent: "",
+          bedRooms: "",
+          squareFeet: "",
+          deposit: "",
+          petsAllowed: false,
+          smokingAllowed: false,
+          Amenities: "",
+          additionalDetails: "",
+          listingCategory: "Rent",
+          availableFrom: new Date(),
+          rentalDuration: "",
+          nearByGroceries: "",
+          rentalType: "",
+          busConnectivity: "",
+          parking: false,
+          foodPreference: "",
+          preferredGender: "",
+          salePrice: "",
+          advance: "",
+          duration: "",
+          bathRooms: "",
+          city: "",
+          pictures: []
+        })
+      }
+      setLoading(false)
+
 
     }
   };
@@ -136,7 +191,7 @@ const HomeRentalForm = () => {
       
         const handleTabPress = (index) => {
           setActiveTab(index);
-          handleInputChange("category", index === 0 ? "Rent" : "Sale");
+          handleInputChange("listingCategory", index === 0 ? "Rent" : "Sale");
           Animated.timing(translateX, {
             toValue: index,
             duration: 300,
@@ -148,6 +203,14 @@ const HomeRentalForm = () => {
         <ScrollView contentContainerStyle={styles.container}>
 
       <View style={styles.secondContainer}>
+         <Modal visible={loading} transparent>
+                <View style={styles.overlay}>
+                  <View style={styles.loaderContainer}>
+                    <ActivityIndicator size="large" color="#fff" />
+                    <Text style={styles.text}>Loading, please wait...</Text>
+                  </View>
+                </View>
+              </Modal>
       {/* <Text style={{...styles.label,textAlign: 'center', fontSize: 16}}>Rental Type</Text> */}
 
           {/* Tabs */}
@@ -219,7 +282,7 @@ const HomeRentalForm = () => {
       </View>
       </View>
 
-      {form.category == "Rent"?<><View style={styles.rowContainer}>
+      {form.listingCategory == "Rent"?<><View style={styles.rowContainer}>
         <View style={styles.rowItem}>
           <Text style={styles.label}>Monthly Rent</Text>
           <TextInput
@@ -386,15 +449,15 @@ const HomeRentalForm = () => {
       <View style={styles.rowContainer}>
 
       <View style={styles.rowItem}>
-          <Text style={styles.label}>Bedrooms</Text>
+          <Text style={styles.label}>bedRooms</Text>
           <TextInput
-            style={[styles.input, errors.bedrooms && styles.errorInput]}
-            value={form.bedrooms}
-            onChangeText={(text) => handleInputChange("bedrooms", text)}
-            placeholder="Enter bedrooms"
+            style={[styles.input, errors.bedRooms && styles.errorInput]}
+            value={form.bedRooms}
+            onChangeText={(text) => handleInputChange("bedRooms", text)}
+            placeholder="Enter bedRooms"
             keyboardType="numeric"
           />
-          {errors.bedrooms && <Text style={styles.errorText}>{errors.bedrooms}</Text>}
+          {errors.bedRooms && <Text style={styles.errorText}>{errors.bedRooms}</Text>}
         </View>
 
       <View style={styles.rowItem}>
@@ -445,7 +508,7 @@ const HomeRentalForm = () => {
 
        
 
-      {form.category ==="Rent"?<View style={styles.rowContainer}>
+      {form.listingCategory ==="Rent"?<View style={styles.rowContainer}>
 
         <View style={styles.rowItem}>
       <Text style={styles.label}>Rental Type</Text>
@@ -511,8 +574,8 @@ const HomeRentalForm = () => {
           <View style={styles.switchContainer}>
             <Text style={styles.switchLabel}>Pets Allowed?</Text>
             <Switch
-              value={form.petFriendly}
-              onValueChange={(value) => handleInputChange("petFriendly", value)}
+              value={form.petsAllowed}
+              onValueChange={(value) => handleInputChange("petsAllowed", value)}
             />
           </View>
         </View>
@@ -521,14 +584,14 @@ const HomeRentalForm = () => {
       <View style={styles.switchContainer}>
         <Text style={styles.switchLabel}>Smoking Allowed?</Text>
         <Switch
-          value={form.doYouSmoke}
-          onValueChange={(value) => handleInputChange("doYouSmoke", value)}
+          value={form.smokingAllowed}
+          onValueChange={(value) => handleInputChange("smokingAllowed", value)}
         />
       </View>
       </View>
       </View>
 
-      {form.category == "Rent"&&<View style={styles.rowContainer}>
+      {form.listingCategory == "Rent"&&<View style={styles.rowContainer}>
 
       <View style={styles.rowItem}>
       <Text style={styles.label}>Food Preference</Text>
@@ -600,12 +663,12 @@ const HomeRentalForm = () => {
 
       <Text style={styles.label}>Amenties</Text>
       <TextInput
-        style={[styles.input, errors.features && styles.errorInput]}
-        value={form.features}
-        onChangeText={(text) => handleInputChange("features", text)}
+        style={[styles.input, errors.Amenities && styles.errorInput]}
+        value={form.Amenities}
+        onChangeText={(text) => handleInputChange("Amenities", text)}
         placeholder="Enter Amenities"
       />
-      {errors.features && <Text style={styles.errorText}>{errors.features}</Text>}
+      {errors.Amenities && <Text style={styles.errorText}>{errors.Amenities}</Text>}
 
       <View style={{flex:1, flexDirection: "row"}}>
       <Text style={{...styles.label,paddingTop: 5,marginRight:10}}>Upload Pictures:</Text>
@@ -831,6 +894,22 @@ const HomeRentalForm = () => {
     backgroundColor: '#ddd',
     borderRadius: 25,
     zIndex: -1,
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)', // Dark semi-transparent background
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loaderContainer: {
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  text: {
+    color: '#fff',
+    marginTop: 10,
+    fontSize: 16,
   },
   });
   

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -12,11 +12,16 @@ import {
   Dimensions,
   Button,
   Modal,
+  Platform,
+  ToastAndroid,
+  AlertIOS
 } from "react-native";
 // import DateTimePickerModal from 'react-native-modal-dateti/me-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as ImagePicker from 'expo-image-picker';
 import { Colors } from "@/constants/Colors";
+import { useSelector } from "react-redux";
+import { ActivityIndicator } from "react-native";
 
 const UtilityRental = () => {
   const [type, setType] = useState("");
@@ -41,6 +46,26 @@ const UtilityRental = () => {
   const [availabilityModalVisible, setAvailabilityModalVisible] = useState(false);
   const categories = ['house','car', 'baby', 'kitchen', 'move out', 'others']
   const availablityOptions = ['Available', 'Sold', 'Hold']
+  const [loading, setLoading] = useState(false);
+  
+
+
+  const userId = useSelector((state) => state.rental.userId);
+  useEffect(()=>{
+    console.log("userID", userId)
+  },[userId])
+
+
+  const resetForm = () => {
+    setType("");
+    setLocation("");
+    setPinCode("");
+    setAdditonalInfo("");
+    setUtilities([]);
+    setFromDate(new Date());
+    setToDate(new Date());
+    setPictures([]);
+  }
   
   
 
@@ -58,6 +83,7 @@ const UtilityRental = () => {
         mediaTypes: ["images"],
         allowsEditing: true,
         aspect: [4, 3],
+        base64: true,
         quality: 1,
       });
   
@@ -73,6 +99,7 @@ const UtilityRental = () => {
         allowsEditing: true,
         allowsMultipleSelection: true,
         aspect: [4, 3],
+        base64: true,
         quality: 1,
       });
   
@@ -100,7 +127,7 @@ const UtilityRental = () => {
       storeLink,
       pictures,
     };
-    console.log("newUtility",newUtility)
+    // console.log("newUtility",newUtility)
 
     setUtilities([...utilities, newUtility]);
 
@@ -112,8 +139,23 @@ const UtilityRental = () => {
     setPictures([]);
   };
 
+
+  const extractPictures = (data) => {
+    return data.flatMap(item => 
+      (item.pictures || []).map(pic => {
+        const parts = pic.fileName.split('.'); 
+        const extension = parts.length > 1 ? parts.pop() : ''; // Extract extension if present
+        const baseName = parts.join('.'); // Join the rest back in case there are multiple dots in the name
+        return {
+          base64: "data:image/jpeg;base64,"+pic.base64,
+          fileName: `${baseName}-${item.itemName}.${extension}`
+        };
+      })
+    );
+  };
+
   // Submit the form
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if ( !type || !location) {
       Alert.alert("Error", "Please fill all required fields.");
       return;
@@ -133,8 +175,29 @@ const UtilityRental = () => {
       additionalInfo,
       utilities,
     };
+    const pictures = extractPictures(utilities)
+    setLoading(true)
+    console.log("payload", JSON.stringify({ categoryId:2, createdBy:userId, listingCategory:type, location:location, pinCode:pinCode, availableFrom: fromDate, availableTo: toDate, additionalDetails:additionalInfo, utilities:utilities, pictures:pictures}));
 
-    Alert.alert("Submitted Successfully!", JSON.stringify(rentalData, null, 2));
+    const response = await fetch('https://my9ivim6h2.execute-api.us-east-1.amazonaws.com/default/createUtility', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({ categoryId:2, createdBy:userId, listingCategory:type, location:location, pinCode:pinCode, availableFrom: fromDate, availableTo: toDate, additionalDetails:additionalInfo, utilities:utilities, pictures:pictures}),
+                });
+          
+                const data = await response.json();
+                console.log(data)
+                if(data.message){
+                  if (Platform.OS === 'android') {
+                    ToastAndroid.show("Listing created Successfully", ToastAndroid.SHORT)
+                  } else {
+                    AlertIOS.alert("Listing created Successfully");
+                  }
+                  resetForm()
+                }
+                setLoading(false)
   };
   const blurhash =
   '|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[';
@@ -142,12 +205,15 @@ const UtilityRental = () => {
 
   return (
     <ScrollView style={styles.container} nestedScrollEnabled={true}>
-    
-      {/* Title */}
-      {/* <Text style={styles.label}>Title:</Text>
-      <TextInput value={title} onChangeText={setTitle} style={styles.input} /> */}
+       <Modal visible={loading} transparent>
+                      <View style={styles.overlay}>
+                        <View style={styles.loaderContainer}>
+                          <ActivityIndicator size="large" color="#fff" />
+                          <Text style={styles.text}>Loading, please wait...</Text>
+                        </View>
+                      </View>
+                    </Modal>
 
-      {/* Type */}
       <Text style={styles.label}>Category:</Text>
       <TouchableOpacity style={styles.input} onPress={() => setModalVisible(true)}>
               <Text style={type ? styles.textSelected : styles.textPlaceholder}>
@@ -425,6 +491,22 @@ const styles = StyleSheet.create({
   textarea: {
     height: 100,
     textAlignVertical: "top",
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)', // Dark semi-transparent background
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loaderContainer: {
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  text: {
+    color: '#fff',
+    marginTop: 10,
+    fontSize: 16,
   },
 });
 

@@ -66,7 +66,7 @@ const SignUpPage = () => {
       setShowOTP(true)
     }
     
-    console.log(data);
+    console.log("Data>>",data);
   };
 
   // const defaultStyles = getDefaultStyles();
@@ -254,6 +254,26 @@ const SignUpPage = () => {
         </View>
 
         <View style={styles.inputContainer}>
+          <Text style={styles.label}>Password</Text>
+          <Controller
+            control={control}
+            rules={{ required: 'Password is required' }}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInput
+                style={[styles.input, errors.password && styles.errorInput]}
+                onBlur={onBlur}
+                value={value}
+                onChangeText={(val)=>{onChange(val); resetError("password") }}
+                placeholder="Enter password"
+                secureTextEntry
+              />
+            )}
+            name="password"
+          />
+          {errors.password && <Text style={styles.error}>{errors.password}</Text>}
+        </View>
+
+        <View style={styles.inputContainer}>
           <Text style={styles.label}>Student / Corporate Email Address</Text>
           <Controller
             control={control}
@@ -278,6 +298,7 @@ const SignUpPage = () => {
           />
           {errors.email && <Text style={styles.error}>{errors.email}</Text>}
         </View>
+        
 
     <View style={{marginBottom: 10}}>
     <Text style={styles.label}>Mobile Number</Text>

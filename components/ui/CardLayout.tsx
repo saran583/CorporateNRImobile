@@ -5,32 +5,17 @@ import { useNavigation } from '@react-navigation/native';
 import CategoryTabs from './FilterTab';
 import { Colors } from '@/constants/Colors';
 
-const CardLayout = () => {
+const CardLayout = ({posts}) => {
   // console.log("navigation",navigation)
   const navigation = useNavigation()
   return (
     <View style={{backgroundColor: Colors.secondary, height: "100%", paddingBottom:10}}>
     <CategoryTabs></CategoryTabs>
     <ScrollView style={styles.container}>
-      {/* <Text style={styles.sectionTitle}>Top Stories</Text> */}
-      {renderCard(navigation,"3bhk Villa For Sale test", "30000", "Texas, USA", ["Gym", "Parking", "ClubHouse"], Dimensions.get('window').width *0.97)}
-      
-      {/* <Text style={styles.sectionTitle}>Latest Posts</Text> */}
-      {renderCard(navigation,"3bhk Villa For Sale", "30000", "Texas, USA", ["Gym", "Parking", "ClubHouse"], Dimensions.get('window').width * 0.97)}
-      
-      {/* <Text style={styles.sectionTitle}>Featured Posts</Text> */}
-      {renderCard(navigation,"3bhk Villa For Sale", "30000", "Texas, USA", ["Gym", "Parking", "ClubHouse"], Dimensions.get('window').width * 0.97)}
-
-      {renderCard(navigation,"3bhk Villa For Sale", "30000", "Texas, USA", ["Gym", "Parking", "ClubHouse"], Dimensions.get('window').width * 0.97)}
-
-      {renderCard(navigation,"3bhk Villa For Sale", "30000", "Texas, USA", ["Gym", "Parking", "ClubHouse"], Dimensions.get('window').width * 0.97)}
-
-      {renderCard(navigation,"3bhk Villa For Sale", "30000", "Texas, USA", ["Gym", "Parking", "ClubHouse"], Dimensions.get('window').width * 0.97)}
-      
-      {renderCard(navigation,"3bhk Villa For Sale", "30000", "Texas, USA", ["Gym", "Parking", "ClubHouse"], Dimensions.get('window').width * 0.97)}
-
-{renderCard(navigation,"3bhk Villa For Sale", "30000", "Texas, USA", ["Gym", "Parking", "ClubHouse"], Dimensions.get('window').width * 0.97)}
-
+      {posts.map((post)=>{
+        return renderCard(navigation,post, Dimensions.get('window').width *0.97)    
+      }
+      )}
     </ScrollView>
     </View>
   );
