@@ -147,9 +147,9 @@ const HomeRentalForm = () => {
       console.log(data)
       if(data.message){
         if (Platform.OS === 'android') {
-          ToastAndroid.show("Rental created Successfully", ToastAndroid.SHORT)
+          ToastAndroid.show(data.message, ToastAndroid.SHORT)
         } else {
-          AlertIOS.alert("Rental created Successfully");
+          AlertIOS.alert(data.message);
         }
         setForm({
           // title: "",

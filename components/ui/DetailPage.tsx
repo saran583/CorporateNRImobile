@@ -2,6 +2,7 @@ import { Colors } from "@/constants/Colors";
 import React, { useEffect, useState } from "react";
 import { View, Text, Image, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
 import SkeletonLoader from "./SkeletonLoader";
+import { getDetails } from "../Utils";
 
 const PropertyDetails = ({route}) => {
   console.log(route)
@@ -23,28 +24,24 @@ const PropertyDetails = ({route}) => {
     getPost();
   },[])
 
-  const propertyDetails = {
-    title: "Luxury 2BHK Apartmentsdfg",
-    location: "Downtown, New York",
-    category: "Rental",
-    price: "$2500/month",
-    bedrooms: 2,
-    bathrooms: 2,
-    size: "1200 Sq.ft",
-    deposit: "$5000",
-    availableFrom: "March 1, 2025",
-    rentalDuration: "1 Year Lease",
-    rentalType: "Fully Furnished",
-    petAllowed: "Yes",
-    smokingAllowed: "No",
-    foodPreference: "Vegetarian Preferred",
-    parking: "Available",
-    groceries: "500m",
-    busConnectivity: "100m",
-    corporateHubs: "1km",
-    preferredGender: "Any",
-    amenities: ["Gym", "Swimming Pool", "24/7 Security", "Wi-Fi", "Power Backup"],
-  };
+  const CardData =(postDetail,index)=>{
+    let imageUrl = ""
+    post.images.map((image)=>{
+      if(image.indexOf(postDetail.name)>0){
+        imageUrl = image 
+      }
+      return image
+    })
+    return  <View style={styles.card} key={index}>
+    <View style={styles.textContainer}>
+      <Text style={styles.utility_title}>Item Name: {postDetail.name}</Text>
+      <Text style={styles.description}>Price: {postDetail.price}</Text>
+      <Text style={styles.description}>Link: {postDetail.storeLink}</Text>
+    </View>
+
+    <Image source={{ uri: imageUrl }} style={styles.image} />
+  </View>
+  }
 
   return (
     <ScrollView style={styles.container}>
@@ -63,38 +60,34 @@ const PropertyDetails = ({route}) => {
       {/* Property Details */}
       <View style={styles.detailsContainer}>
         <Text style={styles.title}>{post.title}</Text>
-        <Text style={styles.location}>{post.location+","+postDetail.city}</Text>
+        <Text style={styles.location}>{post.location+","+postDetail.city?postDetail.city:""}</Text>
 
         {/* Property Info */}
         {loading?<SkeletonLoader width={"100%"} height={500}></SkeletonLoader>:<View style={styles.infoContainer}>
-          <InfoItem label="Category" value={post.listingCategory} />
-          <InfoItem label="Price" value={post.listingCategory==="Sale"?post.price:post.price+"/monthly"} />
-          {postDetail.listing_category==="Sale"&&<InfoItem label="Advance" value={postDetail.advance} />}
-          <InfoItem label="Pincode" value={postDetail.pincode} />
-          <InfoItem label="Bedrooms" value={postDetail.bedrooms} />
-          <InfoItem label="Bathrooms" value={postDetail.bathrooms} />
-          <InfoItem label="Size" value={postDetail.square_feet} />
-          <InfoItem label="Deposit" value={postDetail.deposit} />
-          <InfoItem label="Available From" value={postDetail.available_from} />
-          {postDetail.listing_category==="Rent"&&<InfoItem label="Rental Duration" value={postDetail.rental_duration} />}
-          {postDetail.listing_category==="Rent"&&<InfoItem label="Rental Type" value={postDetail.rental_type} />}
-          <InfoItem label="Pet Allowed?" value={postDetail.pets_allowed==1?"Yes":"No"} />
-          <InfoItem label="Smoking Allowed?" value={postDetail.smoking_allowed==1?"Yes":"No"} />
-          {postDetail.listing_category==="Rent"&&<InfoItem label="Food Preference" value={postDetail.food_preference} />}
-          <InfoItem label="Parking" value={postDetail.is_parking_available==1?"Yes":"No"} />
-          <InfoItem label="Nearby Groceries" value={postDetail.nearby_groceries} />
-          <InfoItem label="Bus Connectivity" value={postDetail.bus_connectivity} />
-          {postDetail.listing_category==="Rent"&&<InfoItem label="Preferred Gender" value={postDetail.preferred_gender} />}
-          <InfoItem label="Additional Details" value={postDetail.additional_detail+" "+postDetail.additional_detail+" "+postDetail.additional_detail+" "+postDetail.additional_detail+" "+postDetail.additional_detail} />
+          {Object.entries(getDetails(postDetail)).map(([key,value],index)=>{
+            return <InfoItem key={index}  label={key} value={value} />
+          })}
         </View>}
 
         {/* Amenities */}
+        
+        {postDetail.category_id && postDetail.category_id==1&&<>
         <Text style={styles.sectionTitle}>Amenities</Text>
         <View style={styles.amenitiesContainer}>
           {post.amenities.map((amenity, index) => (
             <Text key={index} style={styles.amenity}>{amenity}</Text>
           ))}
         </View>
+        </>}
+
+        {!loading && postDetail.category_id==2 && postDetail.utility_items && 
+        <>
+        <Text style={styles.sectionTitle}>Utility Items</Text>
+        {JSON.parse(postDetail.utility_items.replace(/\\"/g, '"')).map((post,index)=>{
+          return CardData(post,index) 
+        })}
+        </>
+        }
 
       </View>
       <TouchableOpacity style={styles.submitButton}>
@@ -210,6 +203,39 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     width: '50%',
     marginHorizontal: 'auto'
+  },
+
+
+  card: {
+    flexDirection: "row", // Arrange content in a row (text left, image right)
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 10,
+    margin: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5, // For Android shadow
+    alignItems: "center", // Align items vertically
+  },
+  textContainer: {
+    flex: 1, // Takes remaining space
+    paddingRight: 10, // Add spacing between text and image
+  },
+  utility_title: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+  description: {
+    fontSize: 14,
+    color: "#666",
+  },
+  image: {
+    width: 80, // Adjust as needed
+    height: 80, // Adjust as needed
+    borderRadius: 10,
   },
 });
 

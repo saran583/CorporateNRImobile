@@ -1,5 +1,7 @@
 import renderCard from '@/components/ui/CardRenderer';
 import CategoryTabs from '@/components/ui/FilterTab';
+import SkeletonLoader from '@/components/ui/SkeletonLoader';
+import { filterPosts } from '@/components/Utils';
 import { Colors } from '@/constants/Colors';
 import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useRef, useState } from 'react';
@@ -7,51 +9,101 @@ import { View, Text, StyleSheet, Image, Dimensions, ScrollView, FlatList, Toucha
 
 
 export default function HomeScreen() {
-  const data = [
-    { id: 1, text: 'Item 1', color: '#FF5733' },
-    { id: 2, text: 'Item 2', color: '#33FF57' },
-    { id: 3, text: 'Item 3', color: '#3357FF' },
-    { id: 4, text: 'Item 4', color: '#F3FF33' },
-    { id: 5, text: 'Item 5', color: '#FF33A1' },
-  ];
 
-
+  
   const flatListRef = useRef(null);
   const windowWidth = Dimensions.get('window').width;
   const [currentIndex, setCurrentIndex] = useState(0);
   const cardWidth = windowWidth; // Card width set to 70% of the screen width
   const navigation = useNavigation()
+  const [topStories, setTopStories] = useState([])
+  const [latestPosts, setLatestPosts] = useState([])
+  const [featuredPosts, setFeaturedPosts] = useState([])
+  const [topStoriesLoading, setTopStoriesLoading] = useState(true)
+  const [latestLoading, setLatestLoading] = useState(true)
+  const [featuredLoading, setFeaturedLoading] = useState(true)
+
+
+  
+
+  useEffect(()=>{
+    getFeaturedPosts();
+    getDashboardPosts();
+    getLatestPosts()
+
+  },[])
+
+  const getFeaturedPosts = async()=>{
+      console.log("entered get today posts api")
+      let response = await fetch("https://my9ivim6h2.execute-api.us-east-1.amazonaws.com/default/getFeaturedPosts")
+      const postResponse = await response.json();
+      
+      console.log(postResponse)
+  
+      const filteredPosts = await filterPosts(postResponse)
+      console.log(filteredPosts)
+      setFeaturedPosts(filteredPosts);
+      setFeaturedLoading(false);
+    }
+
+    const getDashboardPosts = async()=>{
+      console.log("entered get today posts api")
+      let response = await fetch("https://my9ivim6h2.execute-api.us-east-1.amazonaws.com/default/getDashboardPosts")
+      const postResponse = await response.json();
+      
+      console.log(postResponse)
+  
+      const filteredPosts = await filterPosts(postResponse)
+      console.log(filteredPosts)
+      setTopStories(filteredPosts);
+      setTopStoriesLoading(false);
+
+    }
+
+    const getLatestPosts = async()=>{
+      console.log("entered get today posts api")
+      let response = await fetch("https://my9ivim6h2.execute-api.us-east-1.amazonaws.com/default/getLatestPosts")
+      const postResponse = await response.json();
+      
+      console.log(postResponse)
+  
+      const filteredPosts = await filterPosts(postResponse)
+      console.log(filteredPosts)
+      setLatestPosts(filteredPosts);
+      setLatestLoading(false);
+    }
+
+
 
   const renderCards = ({ item }) => (
-   // <View style={[styles.card, { backgroundColor: item.color }]}>
-    //{ /* <Text style={styles.cardTitle}>{item.text}</Text> */ }
-    //{ /* <CardLayout title="Villa for Sale" price="$35000" location="texas" features={["pool", "parking", "Gym", "SPA"]} /> */}
-     
-      renderCard(navigation, {
-        title:"3bhk Villa For Sale test", 
-        price:"$30000", 
-        location:"Texas, USA", 
-        amenities:["Gym", "Parking", "ClubHouse"],
-        postedBy:"john Doe",
-        createdAt: "10 mins ago",
-        images: ["https://corporatenriappimages.s3.amazonaws.com/uploads/1741710437228-house.jpg"] 
-      })
-    
- //</View>
+      renderCard(navigation, item)
   );
 
+  const renderLoadingComponent = () => (
+    <View style={{width: windowWidth, height:150, paddingHorizontal: 10, paddingVertical: 20}} >
+      <SkeletonLoader width={"80%"} height={25}></SkeletonLoader>
+      <SkeletonLoader width={"60%"} height={25}></SkeletonLoader>
+      <SkeletonLoader width={"40%"} height={25}></SkeletonLoader>
+    </View>
+  );
+
+  const renderEmptyComponent = () => (
+    <View style={{width: windowWidth, height:150, paddingHorizontal: 10, paddingVertical: 20}} >
+      
+    </View>
+  );
 
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentIndex((prevIndex) => {
-        const nextIndex = (prevIndex + 1) % data.length;
+        const nextIndex = (prevIndex + 1) % topStories.length;
         flatListRef.current?.scrollToIndex({ animated: true, index: nextIndex });
         return nextIndex;
       });
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [data.length]);
+  }, [topStories.length]);
 
   const onViewableItemsChanged = useRef(({ viewableItems }) => {
     if (viewableItems.length > 0) {
@@ -72,8 +124,8 @@ export default function HomeScreen() {
     <Text style={styles.title}>Top Stories</Text>
       <FlatList
         ref={flatListRef}
-        data={data}
-        renderItem={renderCards}
+        data={topStories.length>0?topStories:[{}]}
+        renderItem={topStories.length>0?renderCards: topStoriesLoading?renderLoadingComponent: renderEmptyComponent}
         keyExtractor={(item) => item.id}
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -87,7 +139,7 @@ export default function HomeScreen() {
         viewabilityConfig={viewabilityConfig}
       />
        <View style={styles.dotsContainer}>
-        {data.map((_, index) => (
+        {topStories.map((_, index) => (
           <View
             key={index}
             style={[
@@ -104,8 +156,8 @@ export default function HomeScreen() {
     <Text style={styles.title}  >Latest Posts</Text>
     </TouchableOpacity>
       <FlatList
-        data={data}
-        renderItem={renderCards}
+        data={latestPosts.length>0?latestPosts:[{}]}
+        renderItem={latestPosts.length>0?renderCards: latestLoading?renderLoadingComponent: renderEmptyComponent}
         keyExtractor={(item) => item.id}
         horizontal
         showsHorizontalScrollIndicator={true}
@@ -136,8 +188,8 @@ export default function HomeScreen() {
     <Text style={styles.title}>Featured Posts</Text>
     </TouchableOpacity>
       <FlatList
-        data={data}
-        renderItem={renderCards}
+        data={featuredPosts.length>0?featuredPosts:[{}]}
+        renderItem={featuredPosts.length>0?renderCards:featuredLoading?renderLoadingComponent:renderEmptyComponent}
         keyExtractor={(item) => item.id}
         horizontal
         showsHorizontalScrollIndicator={false}

@@ -1,4 +1,4 @@
-import { setUserId } from "@/app/rentalSlice";
+import { setUserId, setUserName } from "@/app/rentalSlice";
 import { Colors } from "@/constants/Colors";
 import React, { useState } from "react";
 import { ActivityIndicator, Modal } from "react-native";
@@ -81,6 +81,8 @@ const SignInScreen = ({navigation}) => {
         setApiError('');
         setLoading(false)
         dispatch(setUserId(data.userId))
+        dispatch(setUserName(data.name))
+        
         
         // Navigate to another screen on successful login
         // navigation.navigate('Home');

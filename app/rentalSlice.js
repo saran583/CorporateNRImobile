@@ -3,7 +3,8 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   rentalType: "rental",
-  userId: ""
+  userId: "",
+  userName: ""
 };
 
 const rentalSlice = createSlice({
@@ -15,9 +16,12 @@ const rentalSlice = createSlice({
     },
     setUserId: (state, action) =>{
       state.userId = action.payload;
+    },
+    setUserName: (state, action) =>{
+      state.userName = action.payload
     }
   },
 });
 
-export const { setRentalType, setUserId } = rentalSlice.actions;
+export const { setRentalType, setUserId, setUserName } = rentalSlice.actions;
 export default rentalSlice.reducer;

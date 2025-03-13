@@ -13,38 +13,23 @@ import renderCard from "./CardRenderer";
 import { useNavigation } from "@react-navigation/native";
 import { Dimensions } from "react-native";
 import CategoryTabs from "./FilterTab";
-
-const DATA = [
-  { id: "1", name: "3bhk Villa for Sale ", type: "Rentals", price: 200000 },
-  { id: "2", name: "Flat for Rent", type: "Rentals", price: 5000 },
-  { id: "3", name: "Need Travel Companion", type: "Other", price: 80 },
-  { id: "4", name: "Furniture Items for Sale", type: "Commerce", price: 150 },
-  { id: "5", name: "Office Chairs and Tables", type: "Commerce", price: 300 },
-  { id: "6", name: "Need Medical Support", type: "Other", price: 120 },
-];
+import { filterPosts } from "../Utils";
 
 export default function SearchComponent() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredData, setFilteredData] = useState(DATA);
+  const [filteredData, setFilteredData] = useState([]);
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const [selectedType, setSelectedType] = useState(null);
   const navigation = useNavigation()
 
   // Update the displayed data based on search and filter
-  const updateFilteredData = (query, type) => {
-    let filtered = DATA;
-
-    if (query) {
-      filtered = filtered.filter((item) =>
-        item.name.toLowerCase().includes(query.toLowerCase())
-      );
-    }
-
-    if (type) {
-      filtered = filtered.filter((item) => item.type === type);
-    }
-
-    setFilteredData(filtered);
+  const updateFilteredData = async (query, type) => {
+    const res= await fetch("https://my9ivim6h2.execute-api.us-east-1.amazonaws.com/default/getSearchResults?"+searchQuery);
+    const postResults = await res.json();
+    console.log("result", postResults)
+    let filteredResults = await filterPosts(postResults)
+    console.log(filteredResults)
+    setFilteredData(filteredResults)
   };
 
   // Handle Search Input
@@ -67,15 +52,12 @@ export default function SearchComponent() {
     updateFilteredData(searchQuery, null);
   };
 
-  const renderCards = ({ item }) => (
-    // <View style={[styles.card, { backgroundColor: item.color }]}>
-     //{ /* <Text style={styles.cardTitle}>{item.text}</Text> */ }
-     //{ /* <CardLayout title="Villa for Sale" price="$35000" location="texas" features={["pool", "parking", "Gym", "SPA"]} /> */}
-      
-       renderCard(navigation, item.name, item.price, "search", ["Gym", "Parking", "ClubHouse"],  Dimensions.get('window').width * 0.97)
+  const renderCards = ( {item} ) => {
+    console.log("test",item)
+   
+      return renderCard(navigation, item,  Dimensions.get('window').width * 0.97)
      
-  //</View>
-   );
+  };
 
   return (
     <View style={styles.container}>

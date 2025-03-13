@@ -12,11 +12,14 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { FloatingAction } from "react-native-floating-action";
 import { useNavigation } from '@react-navigation/native';
 import ProfileIcon from '@/components/ui/ProfileIcon';
+import { useSelector } from 'react-redux';
 
 
 export default function TabLayout() {
   // const colorScheme = useColorScheme();
   const navigation = useNavigation();
+  const userName = useSelector((state) => state.rental.userName);
+
 
 
   const actions = [
@@ -54,7 +57,7 @@ export default function TabLayout() {
     <>
     <View style={{height: 90,backgroundColor: Colors.primary, flexDirection:'row', width:'100%', paddingTop:45, paddingHorizontal:15, justifyContent: 'space-between'}}>
     <View style={{flexDirection:'row'}}>
-    <ProfileIcon name="John Doe" size={35} backgroundColor="#4CAF50" textColor="#FFFFFF" />
+    <ProfileIcon name={userName} size={35} backgroundColor="#4CAF50" textColor="#FFFFFF" />
     <Text style={{color:"#fff", fontSize: 22, paddingTop:3, fontWeight: '500'}} numberOfLines={1}>Corporate NRI</Text>
     </View>
     <View style={styles.headerIconsContainer}>

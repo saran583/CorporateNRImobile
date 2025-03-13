@@ -1,19 +1,29 @@
-import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Dimensions, RefreshControl } from 'react-native';
 import renderCard from './CardRenderer';
 import { useNavigation } from '@react-navigation/native';
 import CategoryTabs from './FilterTab';
 import { Colors } from '@/constants/Colors';
 
-const CardLayout = ({posts}) => {
+const CardLayout = ({posts, onRefreshCalled}) => {
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    onRefreshCalled();
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 2000);
+  };
   // console.log("navigation",navigation)
   const navigation = useNavigation()
   return (
     <View style={{backgroundColor: Colors.secondary, height: "100%", paddingBottom:10}}>
     <CategoryTabs></CategoryTabs>
-    <ScrollView style={styles.container}>
-      {posts.map((post)=>{
-        return renderCard(navigation,post, Dimensions.get('window').width *0.97)    
+    <ScrollView style={styles.container} 
+    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
+      {posts.map((post,index)=>{
+        return renderCard(navigation,{...post,index}, Dimensions.get('window').width *0.97)
       }
       )}
     </ScrollView>

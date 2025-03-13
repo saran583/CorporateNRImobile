@@ -5,8 +5,14 @@ import { StyleSheet, TouchableOpacity } from "react-native";
 import { Text, View } from "react-native";
 import Icon from 'react-native-vector-icons/MaterialIcons'; 
 import ProfileIcon from "./ui/ProfileIcon";
+import { useSelector } from "react-redux";
 
 export default function HomeScreen ({ navigation }) {
+  
+  const userName = useSelector((state) => state.rental.userName);
+  useEffect(()=>{
+    console.log(userName)
+  },[userName])
   
     return (
         <Stack>
@@ -18,7 +24,7 @@ export default function HomeScreen ({ navigation }) {
             },
             headerShown:false,
             headerLeft:(props) =>{
-               return <ProfileIcon name="John Doe" size={35} backgroundColor="#4CAF50" textColor="#FFFFFF" />
+               return <ProfileIcon name={userName} size={35} backgroundColor="#4CAF50" textColor="#FFFFFF" />
             },
             gestureEnabled: false,
             headerRight:()=>{

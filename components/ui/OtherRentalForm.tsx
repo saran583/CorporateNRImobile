@@ -146,6 +146,7 @@ const OtherRentalForm = () => {
                 additionalInformation: "",
                 listingCategory: ""
               })
+              setPictures([])
             }
             setLoading(false)
 

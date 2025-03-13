@@ -191,9 +191,9 @@ const UtilityRental = () => {
                 console.log(data)
                 if(data.message){
                   if (Platform.OS === 'android') {
-                    ToastAndroid.show("Listing created Successfully", ToastAndroid.SHORT)
+                    ToastAndroid.show(data.message, ToastAndroid.SHORT)
                   } else {
-                    AlertIOS.alert("Listing created Successfully");
+                    AlertIOS.alert(data.message);
                   }
                   resetForm()
                 }

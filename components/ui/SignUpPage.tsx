@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Button, StyleSheet, TextInput, TouchableOpacity, ScrollView, Modal } from 'react-native';
+import { View, Text, Button, StyleSheet, TextInput, TouchableOpacity, ScrollView, Modal, ActivityIndicator } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import { Colors } from '@/constants/Colors';
 // import RNPickerSelect from 'react-native-picker-select';
@@ -10,9 +10,11 @@ import PhoneInput, {
   isValidPhoneNumber,
 } from 'react-native-international-phone-number';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { setUserId, setUserName } from '@/app/rentalSlice';
+import { useDispatch } from 'react-redux';
 
 
-const SignUpPage = () => {
+const SignUpPage = ({navigation}) => {
   const { control, handleSubmit } = useForm();
   const [showOTP,setShowOTP] = useState(false)
   const [countryCode, setCountryCode] = useState('+1');
@@ -22,6 +24,9 @@ const SignUpPage = () => {
   const [showGenderModal, setShowGenderModal] = useState(false);
   const [showCountryModal, setShowCountryModal] = useState(false);
   const [showStateModal, setShowStateModal] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch()
+  const [showError, setShowError] = useState("")
 
   
 
@@ -59,13 +64,62 @@ const SignUpPage = () => {
     }
   }
 
-  const onSubmit = (data) => {
+  const SignUp = async (userDetails) =>{
+    setLoading(true);
+    const response = await fetch('https://my9ivim6h2.execute-api.us-east-1.amazonaws.com/default/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          "firstName": userDetails.firstName,
+          "lastName": userDetails.lastName,
+          "gender": userDetails.gender,
+          "dob": userDetails.dateOfBirth,
+          "companyName": userDetails.companyName,
+          "email": userDetails.email,
+          "mobileNumber": userDetails.mobileNumber,
+          "preferredLocation": userDetails.country+"_"+userDetails.state,
+          "password": userDetails.password,
+          "isNRI": isNRI,
+          "otp": userDetails.otp
+        }),
+      })
+
+      const res = await response.json();
+      console.log(res);
+      if(res.message==="Email already registered"){
+        setShowError("Email is already registered try logging in")
+      }
+      else{
+      dispatch(setUserId(res.userId))
+      dispatch(setUserName(res.name))
+
+      
+      setLoading(false);
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Home' }]
+    });
+  }
+      
+  }
+
+
+  const onSubmit = async (data) => {
       
       
     if(!showOTP){
+      const response = await fetch("https://icpskvho6d.execute-api.us-east-1.amazonaws.com/default/getOTP",{method:"POST", headers: {
+        'Content-Type': 'application/json',
+      },body:JSON.stringify({email:control._formValues.email})})
+      const data = await response.json();
+      console.log("changes",data)
       setShowOTP(true)
     }
-    
+    else {
+      SignUp(data)
+    }
     console.log("Data>>",data);
   };
 
@@ -108,6 +162,14 @@ const SignUpPage = () => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Sign Up</Text>
+      <Modal visible={loading} transparent>
+              <View style={styles.overlay}>
+                <View style={styles.loaderContainer}>
+                  <ActivityIndicator size="large" color="#fff" />
+                  <Text style={styles.text}>Loading, please wait...</Text>
+                </View>
+              </View>
+            </Modal>
 
       <View style={styles.card}>
         <View style={styles.rowContainer}>
@@ -193,30 +255,7 @@ const SignUpPage = () => {
                 >
                   <Text>{form.dateOfBirth.toDateString()}</Text>
                 </TouchableOpacity>
-                {/* <DateTimePickerModal
-                  isVisible={isFromDateVisible}
-                  mode="date"
-                  onConfirm={(selectedDate) => {
-                    setIsFromDateVisible(false);
-                    handleInputChange("dateOfBirth", selectedDate)
-                  }}
-                  onCancel={() => setIsFromDateVisible(false)}
-                /> */}
-                {/* <Modal visible={isFromDateVisible} style={{backgroundColor:Colors.primary, width:"50%", maxWidth:"50%", overflow: "hidden", height: 500}} animationType="slide">
-                <DateTimePicker
-                  mode="single"
-                  date={form.dateOfBirth}
-                  onChange={({ date }) => handleInputChange("dateOfBirth", date)}
-                  styles={{
-                    ...defaultStyles,
-                    // width:"50%",
-                    today: { borderColor: 'blue', borderWidth: 1 }, // Add a border to today's date
-                    selected: { backgroundColor: 'blue' }, // Highlight the selected day
-                    selected_label: { color: 'white' }, // Highlight the selected day label
-                  }}
-                />
-                </Modal> */}
-
+                
 <Modal transparent visible={isFromDateVisible} animationType="slide">
         <View style={styles.modalContainer}>
             <DateTimePicker
@@ -468,6 +507,7 @@ const SignUpPage = () => {
             name="otp"
           />
           {errors.mobileNumber && <Text style={styles.error}>{errors.otp}</Text>}
+          {showError}
         </View>}
 
         <TouchableOpacity style={styles.submitButton} onPress={()=>{handleSubmitCheck(); return handleSubmit(onSubmit)}}>

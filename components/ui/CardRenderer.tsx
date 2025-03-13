@@ -4,37 +4,13 @@ import moment from 'moment';
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons'; 
+import { formatTimestamp } from '../Utils';
 
 
-const renderCard = (navigation, post={
-  title:"3bhk Villa For Sale test", 
-  price:"$30000", 
-  location:"Texas, USA", 
-  amenities:["Gym", "Parking", "ClubHouse"],
-  postedBy:"john Doe",
-  createdAt: "10 mins ago",
-  images: ["https://corporatenriappimages.s3.amazonaws.com/uploads/1741710437228-house.jpg"] 
-}, width=Dimensions.get('window').width * 0.90) => {
-
-  const formatTimestamp = (timestamp) => {
-    const now = moment();
-    const time = moment(timestamp);
-  
-    const diffMinutes = now.diff(time, "minutes");
-    const diffHours = now.diff(time, "hours");
-    const diffDays = now.diff(time, "days");
-  
-    if (diffMinutes < 60) {
-      return `${diffMinutes} minutes ago`;
-    } else if (diffHours < 24) {
-      return `${diffHours} hours ago`;
-    } else {
-      return time.format("YYYY-MM-DD"); // Show date if more than a day old
-    }
-  };
+const renderCard = (navigation, post, width=Dimensions.get('window').width * 0.90) => {
 
     
-  return <TouchableOpacity onPress={()=>{ 
+  return <TouchableOpacity key={post.index} onPress={()=>{ 
       navigation.navigate("DetailPage",post)}}>
     <View style={[styles.card, {width: width}]} >
     <View style={styles.content}>
@@ -52,15 +28,15 @@ const renderCard = (navigation, post={
       
       <View style={styles1.features}>
        {post?.amenities?.map((feature, index) => (
-          <Text key={index} style={styles1.featureBadge}>{feature}</Text>
+          <Text key={index} style={styles1.featureBadge} numberOfLines={1} ellipsizeMode="tail">{feature}</Text>
         ))}
       </View>
       <View style={styles1.footer}>
   
-  {post.location!=="search" && <>
+  {/* {post.location!=="search" && <> */}
   <Text style={styles1.time}>posted by: {post?.postedBy}</Text>
   <Text style={styles1.time}>{formatTimestamp(post?.createdAt)}</Text>
-  </>}
+  {/* </>} */}
 </View>
     </View>
     
@@ -71,7 +47,7 @@ const renderCard = (navigation, post={
       source={{uri:post?.images[0]}} 
       style={styles.image}
     />
-    {post?.location !== "search"&&<Text style={{padding:5,backgroundColor:Colors.primary, color:Colors.secondary, borderRadius:5, marginTop:8, textAlign: 'center'}}>Interest</Text>}
+    <Text style={{padding:5,backgroundColor:Colors.primary, color:Colors.secondary, borderRadius:5, marginTop:8, textAlign: 'center'}}>Interest</Text>
     </View>
   </View>
   </TouchableOpacity>
