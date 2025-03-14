@@ -5,7 +5,7 @@ import { filterPosts } from '@/components/Utils';
 import { Colors } from '@/constants/Colors';
 import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Image, Dimensions, ScrollView, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Image, Dimensions, ScrollView, FlatList, TouchableOpacity, RefreshControl } from 'react-native';
 
 
 export default function HomeScreen() {
@@ -22,6 +22,21 @@ export default function HomeScreen() {
   const [topStoriesLoading, setTopStoriesLoading] = useState(true)
   const [latestLoading, setLatestLoading] = useState(true)
   const [featuredLoading, setFeaturedLoading] = useState(true)
+
+  const [refreshing, setRefreshing] = useState(false);
+
+
+
+  const onRefresh = () =>{
+    setRefreshing(true);
+    getFeaturedPosts();
+    getDashboardPosts();
+    getLatestPosts()
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 2000);
+   
+  }
 
 
   
@@ -119,7 +134,8 @@ export default function HomeScreen() {
   return (
     <View style={{backgroundColor: Colors.secondary}}>
     <CategoryTabs></CategoryTabs>
-    <ScrollView style={styles.homeContainer}>
+    <ScrollView style={styles.homeContainer} 
+     refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
    <View style={styles.container}>
     <Text style={styles.title}>Top Stories</Text>
       <FlatList

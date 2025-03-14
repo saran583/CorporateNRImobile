@@ -1,5 +1,5 @@
 import { Colors } from "@/constants/Colors";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -10,22 +10,58 @@ import {
   ScrollView,
 } from "react-native";
 import * as ImagePicker from 'expo-image-picker';
+import { useSelector } from "react-redux";
+import moment from "moment";
 
 
 const ProfileScreen = ({navigation}) => {
+  const userId = useSelector((state) => state.rental.userId);
   const [profileData, setProfileData] = useState({
-    firstName: "John",
-    lastName: "Doe",
-    gender: "Male",
-    dob: "1990-01-01",
-    email: "johndoe@example.com",
-    mobile: "+1234567890",
+    firstName: "",
+    lastName: "",
+    gender: "",
+    dob: "",
+    email: "",
+    mobile: "",
     isEmailVerified: true,
-    aboutMe: "I am a passionate Developer"
+    aboutMe: ""
   });
 
   const [editFields, setEditFields] = useState({}); // Track multiple editable fields
   const [profilePic, setProfilePic] = useState([])
+
+
+  const getProfileData = async ()=>{
+    const response = await fetch("https://my9ivim6h2.execute-api.us-east-1.amazonaws.com/default/getUser?"+userId)
+    const profileData = await response.json()
+    console.log(profileData)
+    const [preferredcountry, preferredstate] = profileData.preferred_location.split("_")
+    const [street, city, state, pincode, country] = profileData.address.split(",")
+    setAddress({
+      street: street,
+      city: city,
+      state: state,
+      pincode: pincode,
+      country: country,
+    })
+    setPreferredLocation({ state: preferredstate,
+      country: preferredcountry})
+    setProfileData({
+      firstName: profileData.first_name,
+      lastName: profileData.last_name,
+      gender: profileData.gender,
+      dob: moment(profileData.date_of_birth).format("YYYY-MM-DD"),
+      email: profileData.email,
+      mobile: profileData.mobile_number,
+      isEmailVerified: true,
+      aboutMe: profileData.about_me
+    })
+  }
+
+  
+  useEffect(()=>{
+    getProfileData()
+  },[])
 
   const [address, setAddress] = useState({
     street: "123 Main St",

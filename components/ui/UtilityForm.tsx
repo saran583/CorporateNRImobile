@@ -40,7 +40,9 @@ const UtilityRental = () => {
 
   const [fromDate, setFromDate] = useState(new Date());
   const [isFromDateVisible, setIsFromDateVisible] = useState(false);
-  const [toDate, setToDate] = useState(new Date());
+  const futureDate = new Date();
+futureDate.setDate(futureDate.getDate() + 10);
+  const [toDate, setToDate] = useState(futureDate);
   const [isToDateVisible, setIsToDateVisible] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [availabilityModalVisible, setAvailabilityModalVisible] = useState(false);
@@ -63,7 +65,7 @@ const UtilityRental = () => {
     setAdditonalInfo("");
     setUtilities([]);
     setFromDate(new Date());
-    setToDate(new Date());
+    setToDate(futureDate);
     setPictures([]);
   }
   
@@ -110,7 +112,7 @@ const UtilityRental = () => {
 
   // Add a new utility item
   const addUtility = () => {
-    if (!itemName || !price || !storeLink || pictures.length === 0) {
+    if (!itemName || !price  || pictures.length === 0) {
       Alert.alert("Error", "Please fill all fields and upload at least one picture.");
       return;
     }
