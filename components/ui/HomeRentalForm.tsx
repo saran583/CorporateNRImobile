@@ -28,6 +28,7 @@ const HomeRentalForm = () => {
       availableFrom: new Date(),
       rentalDuration: "",
       nearByGroceries: "",
+      nearBySchools:"",
       rentalType: "",
       busConnectivity: "",
       parking: false,
@@ -140,7 +141,7 @@ const HomeRentalForm = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ title:"House for "+form.listingCategory, categoryId:1, createdBy: userId, ...form, rentalDuration: form.rentalDuration +" "+form.duration, pictures:base64Images}),
+        body: JSON.stringify({ title:form.listingCategory+`: ${form.bedRooms}bed | ${form.bathRooms}bath`, categoryId:1, createdBy: userId, ...form, rentalDuration: form.rentalDuration +" "+form.duration, pictures:base64Images}),
       });
 
       const data = await response.json();
@@ -383,8 +384,7 @@ const HomeRentalForm = () => {
             style={[styles.input, errors.advance && styles.errorInput]}
             value={form.advance}
             onChangeText={(text) => handleInputChange("advance", text)}
-            placeholder="Enter advance"
-            keyboardType="numeric"
+            placeholder="Enter advance in %"
           />
           {errors.advance && <Text style={styles.errorText}>{errors.advance}</Text>}
         </View>
@@ -557,7 +557,20 @@ const HomeRentalForm = () => {
         </View>
 
         
-      </View>:<View style={{...styles.rowItem, marginBottom: 0}}>
+      </View>:
+      <View style={styles.rowContainer}>
+        <View style={styles.rowItem}>
+          <Text style={styles.label}>NearBy Schools</Text>
+          <TextInput
+            style={[styles.input, errors.nearBySchools && styles.errorInput]}
+            value={form.nearBySchools}
+            onChangeText={(text) => handleInputChange("nearBySchools", text)}
+            placeholder="Enter Near by Schools"
+          />
+          {errors.nearBySchools && <Text style={styles.errorText}>{errors.nearBySchools}</Text>}
+        </View>
+
+        <View style={{...styles.rowItem,  marginTop: 25, marginBottom: 0}}>
           <View style={styles.switchContainer}>
             <Text style={styles.switchLabel}>Parking?</Text>
             <Switch
@@ -565,6 +578,7 @@ const HomeRentalForm = () => {
               onValueChange={(value) => handleInputChange("parking", value)}
             />
           </View>
+        </View>
         </View>}
 
 

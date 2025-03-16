@@ -31,7 +31,9 @@ export default function HomeScreen() {
     setRefreshing(true);
     getFeaturedPosts();
     getDashboardPosts();
-    getLatestPosts()
+    getLatestPosts();
+    setCurrentIndex(0);
+    flatListRef.current?.scrollToIndex({ animated: true, index: 0 });
     setTimeout(() => {
       setRefreshing(false);
     }, 2000);

@@ -6,27 +6,29 @@ export function filterPosts (posts){
             return {
               id: post.id,
               title: post.title,
-              price: post.listing_category === "Sale"? post.sale_price : post.monthly_rent,
+              price: post.listing_category === "Sale"? "$"+post.sale_price : "$"+post.monthly_rent,
               location: post.location,
               postedBy: post.first_name+" "+post.last_name,
               amenities: post.amenities.split(","),
               createdAt: post.created_date,
               images: post.image_url.split(","),
-              listingCategory: post.listing_category
+              listingCategory: post.listing_category,
+              category: post.category_id
             }
           }
           else if(post.category_id==2){
             const utilities = JSON.parse(post.utility_items)
             return {
               id: post.id,
-              title: post.listing_category,
+              title: post.listing_category+" Items for Sale",
               price:  moment(post.available_from).format("YYYY/MM/DD"),
               location: post.location,
               postedBy: post.first_name+" "+post.last_name,
               amenities: utilities.map(item => item.name),
               createdAt: post.created_date,
               images: post.image_url.split(","),
-              listingCategory: post.listing_category
+              listingCategory: post.listing_category,
+              category: post.category_id
             }
           }
           else if(post.category_id==3){
@@ -39,7 +41,8 @@ export function filterPosts (posts){
               amenities: [post.details],
               createdAt: post.created_date,
               images: post.image_url.split(","),
-              listingCategory: post.listing_category
+              listingCategory: post.listing_category,
+              category: post.category_id
     
             }
           }
@@ -53,7 +56,7 @@ export function getDetails(post){
   if(post.category_id==1 && post.listing_category=="Sale"){
     return {
       Category: post.listing_category,
-      Price: post.sale_price,
+      Price: "$"+post.sale_price,
       Advance:post.advance,
       Pincode: post.pincode,
       Bedrooms:post.bedrooms,
@@ -72,7 +75,7 @@ export function getDetails(post){
   else if(post.category_id==1 && post.listing_category=="Rent"){
     return {
       Category: post.listing_category,
-      Price: post.monthly_rent+"/monthly",
+      Price: "$"+post.monthly_rent+"/monthly",
       Pincode: post.pincode,
       Bedrooms:post.bedrooms,
       Bathrooms:post.bathrooms,

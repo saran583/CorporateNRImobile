@@ -19,18 +19,19 @@ const renderCard = (navigation, post, width=Dimensions.get('window').width * 0.9
           // style={styles1.avatar}
         />
         <View>
-        <Text style={styles.title}>{post?.title}</Text>
+        <Text style={styles.title}  numberOfLines={1} ellipsizeMode="tail">{post?.title}</Text>
         <Text style={styles.status}>
         <Text style={{ color: 'green' }}>{post?.price}</Text>  |   <Text style={{ color: "blue"}}>{post?.location}</Text>
       </Text>
       </View>
       </View>
       
-      <View style={styles1.features}>
-       {post?.amenities?.map((feature, index) => (
+      {post.category !==3 ? <View style={styles1.features}>
+       {post?.amenities?.slice(0,3).map((feature, index) => (
           <Text key={index} style={styles1.featureBadge} numberOfLines={1} ellipsizeMode="tail">{feature}</Text>
         ))}
-      </View>
+        {post?.amenities?.length>3&&<Text key={4} style={styles1.featureBadge} numberOfLines={1} ellipsizeMode="tail">+{post?.amenities.length-3}</Text>}
+      </View> : <Text style={{...styles1.featureBadge, backgroundColor: "#fff"}} > </Text>}
       <View style={styles1.footer}>
   
   {/* {post.location!=="search" && <> */}
