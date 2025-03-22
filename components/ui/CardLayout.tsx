@@ -5,8 +5,10 @@ import { useNavigation } from '@react-navigation/native';
 import CategoryTabs from './FilterTab';
 import { Colors } from '@/constants/Colors';
 
-const CardLayout = ({posts, onRefreshCalled}) => {
+const CardLayout = ({posts, onRefreshCalled, selectedCategory, updateSelectedCategory}) => {
   const [refreshing, setRefreshing] = useState(false);
+
+  
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -15,11 +17,12 @@ const CardLayout = ({posts, onRefreshCalled}) => {
       setRefreshing(false);
     }, 2000);
   };
+
   // console.log("navigation",navigation)
   const navigation = useNavigation()
   return (
     <View style={{backgroundColor: Colors.secondary, height: "100%", paddingBottom:10}}>
-    <CategoryTabs></CategoryTabs>
+    <CategoryTabs selectedCategory={selectedCategory} updateSelectedCategory={updateSelectedCategory}></CategoryTabs>
     <ScrollView style={styles.container} 
     refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
       {posts.map((post,index)=>{

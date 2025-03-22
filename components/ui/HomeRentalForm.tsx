@@ -7,6 +7,8 @@ import { Alert } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { setRentalType } from "@/app/rentalSlice";
 import DateTimePicker from '@react-native-community/datetimepicker';
+import awsConfig from "../../aws-config.js"
+import { RNS3 } from "react-native-aws3";
 
 // "@react-native-community/datetimepicker": "^8.2.0",
     // "react-native-date-picker": "^5.0.9",
@@ -28,6 +30,7 @@ const HomeRentalForm = () => {
       availableFrom: new Date(),
       rentalDuration: "",
       nearByGroceries: "",
+      nearBySchools:"",
       rentalType: "",
       busConnectivity: "",
       parking: false,
@@ -73,7 +76,6 @@ const HomeRentalForm = () => {
         mediaTypes: ["images"],
         allowsEditing: true,
         aspect: [4, 3],
-        base64: true,
         quality: 1,
       });
   
@@ -88,7 +90,6 @@ const HomeRentalForm = () => {
         mediaTypes: ["images"],
         allowsEditing: true,
         allowsMultipleSelection: true,
-        base64: true,
         aspect: [4, 3],
         quality: 1,
       });
@@ -96,6 +97,43 @@ const HomeRentalForm = () => {
       if (!result.canceled) {
             handleInputChange("pictures",result.assets);
           }
+    };
+
+
+
+    const uploadImageToS3 = async (images) => {
+      const uploadPromises = images.map(async (image) => {
+        const file = {
+          uri: image.uri,
+          name: `upload_${Date.now()}_${Math.random()}.jpg`,
+          type: "image/jpeg",
+        };
+    
+        const options = {
+          keyPrefix: "uploads/", // S3 folder
+          bucket: awsConfig.bucket,
+          region: awsConfig.region,
+          accessKey: awsConfig.accessKey,
+          secretKey: awsConfig.secretKey,
+          successActionStatus: 201, // Required for success
+        };
+    
+        try {
+          const response = await RNS3.put(file, options);
+          if (response.status !== 201) throw new Error("Upload failed");
+          return response.body.postResponse.location; // Return the uploaded image URL
+        } catch (error) {
+          console.error("Upload Error:", error);
+          return null; // Return null for failed uploads
+        }
+      });
+    
+      // Wait for all uploads to finish
+      const uploadedUrls = await Promise.all(uploadPromises);
+      console.log(uploadedUrls)
+      
+      // Filter out any null (failed uploads)
+      return uploadedUrls.filter((url) => url !== null);
     };
 
 
@@ -130,17 +168,15 @@ const HomeRentalForm = () => {
 
     if (Object.keys(newErrors).length === 0) {
       console.log("Form Submitted:", form);
-      
-      const base64Images = form.pictures.map((picture)=>{
-        return {base64:"data:image/jpeg;base64,"+picture.base64, fileName:picture.fileName}
-      })
       setLoading(true);
+      const base64Images = await uploadImageToS3(form.pictures)
+      
       const response = await fetch('https://my9ivim6h2.execute-api.us-east-1.amazonaws.com/default/createRental', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ title:"House for "+form.listingCategory, categoryId:1, createdBy: userId, ...form, rentalDuration: form.rentalDuration +" "+form.duration, pictures:base64Images}),
+        body: JSON.stringify({ title:form.listingCategory+`: ${form.bedRooms}bed | ${form.bathRooms}bath`, categoryId:1, createdBy: userId, ...form, rentalDuration: form.rentalDuration +" "+form.duration, pictures:base64Images.join(",")}),
       });
 
       const data = await response.json();
@@ -383,8 +419,7 @@ const HomeRentalForm = () => {
             style={[styles.input, errors.advance && styles.errorInput]}
             value={form.advance}
             onChangeText={(text) => handleInputChange("advance", text)}
-            placeholder="Enter advance"
-            keyboardType="numeric"
+            placeholder="Enter advance in %"
           />
           {errors.advance && <Text style={styles.errorText}>{errors.advance}</Text>}
         </View>
@@ -557,7 +592,20 @@ const HomeRentalForm = () => {
         </View>
 
         
-      </View>:<View style={{...styles.rowItem, marginBottom: 0}}>
+      </View>:
+      <View style={styles.rowContainer}>
+        <View style={styles.rowItem}>
+          <Text style={styles.label}>NearBy Schools</Text>
+          <TextInput
+            style={[styles.input, errors.nearBySchools && styles.errorInput]}
+            value={form.nearBySchools}
+            onChangeText={(text) => handleInputChange("nearBySchools", text)}
+            placeholder="Enter Near by Schools"
+          />
+          {errors.nearBySchools && <Text style={styles.errorText}>{errors.nearBySchools}</Text>}
+        </View>
+
+        <View style={{...styles.rowItem,  marginTop: 25, marginBottom: 0}}>
           <View style={styles.switchContainer}>
             <Text style={styles.switchLabel}>Parking?</Text>
             <Switch
@@ -565,6 +613,7 @@ const HomeRentalForm = () => {
               onValueChange={(value) => handleInputChange("parking", value)}
             />
           </View>
+        </View>
         </View>}
 
 

@@ -1,10 +1,12 @@
 import { Colors } from "@/constants/Colors";
+import { useNavigation } from "@react-navigation/native";
 import React, { useState, useEffect } from "react";
 import { 
   Modal, View, Text, Image, TouchableOpacity, StyleSheet, Animated, Easing 
 } from "react-native";
 
 const InterestModal = ({ visible, onClose, interestData }) => {
+  const navigation = useNavigation()
   const scaleAnim = new Animated.Value(0.8); // Animation for pop-up effect
 
   useEffect(() => {
@@ -37,10 +39,12 @@ const InterestModal = ({ visible, onClose, interestData }) => {
           </View>
 
           {/* Post Container */}
+          <TouchableOpacity onPress={()=>{onClose(); navigation.navigate("DetailPage", {id:interestData.listingId, images:interestData.postImage.split(","),title:interestData.postTitle, location:""}) }}>
           <View style={styles.postContainer}>
-            <Image source={require("../../assets/images/house2.jpg")} style={styles.postImage} />
-            <Text style={styles.postTitle}>{interestData.postTitle}</Text>
+            <Image source={{uri: interestData.postImage}} style={styles.postImage} />
+            <Text style={styles.postTitle} numberOfLines={2} ellipsizeMode="tail">{interestData.postTitle}</Text>
           </View>
+          </TouchableOpacity>
 
           {/* Action Button */}
           <TouchableOpacity style={styles.closeButton} onPress={onClose}>
@@ -127,7 +131,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f7f7f7",
     borderRadius: 10,
     padding: 12,
-    marginBottom: 15,
+    marginBottom: 15
   },
   postImage: {
     width: 60,
@@ -139,6 +143,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: "#333",
+    width: 250
   },
   closeButton: {
     backgroundColor: Colors.primary,

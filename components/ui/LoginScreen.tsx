@@ -1,5 +1,5 @@
 import { Colors } from '@/constants/Colors';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,8 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
 } from 'react-native';
+import * as Notifications from 'expo-notifications';
+import Constants from 'expo-constants';
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -15,7 +17,6 @@ const LoginScreen = ({ navigation }) => {
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [apiError, setApiError] = useState('');
-
   // Function to validate inputs
   const validateInputs = () => {
     let isValid = true;
@@ -42,6 +43,9 @@ const LoginScreen = ({ navigation }) => {
 
     return isValid;
   };
+
+
+
 
   const companies = [
     'G',

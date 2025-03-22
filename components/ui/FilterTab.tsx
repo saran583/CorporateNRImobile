@@ -3,21 +3,21 @@ import { View, Text, FlatList, TouchableOpacity, StyleSheet } from "react-native
 import { Ionicons, FontAwesome5, MaterialCommunityIcons } from "@expo/vector-icons"; // Using built-in icon libraries
 
 const categories = [
-    { id: "1", name: "All", icon: "debian", type: "MaterialCommunityIcons" },
-    { id: "2", name: "Houses", icon: "home-city", type: "MaterialCommunityIcons" },
-  { id: "3", name: "Utility", icon: "treasure-chest", type: "MaterialCommunityIcons" },
-  { id: "4", name: "Others", icon: "people", type: "Ionicons" },
+    { id: "0", name: "All", icon: "debian", type: "MaterialCommunityIcons" },
+    { id: "1", name: "Houses", icon: "home-city", type: "MaterialCommunityIcons" },
+  { id: "2", name: "Utility", icon: "treasure-chest", type: "MaterialCommunityIcons" },
+  { id: "3", name: "Others", icon: "people", type: "Ionicons" },
   
 ];
 
-const CategoryTabs = () => {
-  const [selectedCategory, setSelectedCategory] = useState(categories[0].id);
+const CategoryTabs = ({selectedCategory, updateSelectedCategory}) => {
+  
 
   const renderItem = ({ item }) => {
     const isActive = item.id === selectedCategory;
 
     return (
-      <TouchableOpacity style={styles.tab} onPress={() => setSelectedCategory(item.id)}>
+      <TouchableOpacity style={styles.tab} onPress={() => updateSelectedCategory(item.id)}>
         {item.type === "Ionicons" && <Ionicons name={item.icon} size={24} color={isActive ? "black" : "gray"} />}
         {item.type === "FontAwesome5" && <FontAwesome5 name={item.icon} size={24} color={isActive ? "black" : "gray"} />}
         {item.type === "MaterialCommunityIcons" && (

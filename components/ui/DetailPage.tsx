@@ -3,12 +3,17 @@ import React, { useEffect, useState } from "react";
 import { View, Text, Image, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
 import SkeletonLoader from "./SkeletonLoader";
 import { getDetails } from "../Utils";
+import ImageModal from "../ImageModal";
+import InterestModal from "../InterestModal";
 
 const PropertyDetails = ({route}) => {
   console.log(route)
   let post = route.params
   const [postDetail, setPostDetail] = useState({})
   const [loading, setLoading] = useState(true)
+  const [modalData,setModalData] = useState({product:{}, images:[]})
+  const [showModal, setShowModal] = useState(false)
+  const [showInterestModal, setShowInterestModal] = useState(false)
 
   const getPost = async () =>{
     let response = await fetch("https://my9ivim6h2.execute-api.us-east-1.amazonaws.com/default/getListings?"+post.id)
@@ -18,29 +23,39 @@ const PropertyDetails = ({route}) => {
     setLoading(false)
   }
 
+
+
   const [mainImage, setMainImage] = useState(post.images[0]);
 
   useEffect(()=>{
     getPost();
   },[])
 
+  const onShowModal = ({product,images}) =>{
+    setModalData({product:product, images:images})
+    setShowModal(true)
+
+  }
+
   const CardData =(postDetail,index)=>{
-    let imageUrl = ""
+    let imageUrl = []
     post.images.map((image)=>{
-      if(image.indexOf(postDetail.name)>0){
-        imageUrl = image 
+      if(image.indexOf(encodeURIComponent(postDetail.name))>0){
+        imageUrl.push(image)
       }
       return image
     })
-    return  <View style={styles.card} key={index}>
+    return  <TouchableOpacity onPress={()=>{onShowModal({product:postDetail, images:imageUrl})}}>
+    <View style={styles.card} key={index}>
     <View style={styles.textContainer}>
       <Text style={styles.utility_title}>Item Name: {postDetail.name}</Text>
       <Text style={styles.description}>Price: {postDetail.price}</Text>
       <Text style={styles.description}>Link: {postDetail.storeLink}</Text>
     </View>
 
-    <Image source={{ uri: imageUrl }} style={styles.image} />
+    <Image source={{ uri: imageUrl[0] }} style={styles.image} resizeMode="contain" />
   </View>
+  </TouchableOpacity>
   }
 
   return (
@@ -56,6 +71,9 @@ const PropertyDetails = ({route}) => {
           </TouchableOpacity>
         ))}
       </ScrollView>
+
+      {showModal&& <ImageModal  onClose={()=>{setShowModal(false);}} images={modalData.images} product={modalData.product}></ImageModal>}
+      {showInterestModal&&<InterestModal postDetail={{listingId: postDetail.id, hostId: postDetail.created_by}} onClose={()=>{setShowInterestModal(false)}} ></InterestModal>}
 
       {/* Property Details */}
       <View style={styles.detailsContainer}>
@@ -74,7 +92,7 @@ const PropertyDetails = ({route}) => {
         {postDetail.category_id && postDetail.category_id==1&&<>
         <Text style={styles.sectionTitle}>Amenities</Text>
         <View style={styles.amenitiesContainer}>
-          {post.amenities.map((amenity, index) => (
+          {postDetail.amenities.split(",").map((amenity, index) => (
             <Text key={index} style={styles.amenity}>{amenity}</Text>
           ))}
         </View>
@@ -90,7 +108,7 @@ const PropertyDetails = ({route}) => {
         }
 
       </View>
-      <TouchableOpacity style={styles.submitButton}>
+      <TouchableOpacity style={styles.submitButton} onPress={()=>{setShowInterestModal(true)}}>
         <Text style={styles.submitButtonText}>Interested</Text>
       </TouchableOpacity>
     </ScrollView>

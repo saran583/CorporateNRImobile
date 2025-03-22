@@ -1,6 +1,6 @@
 import { setUserId, setUserName } from "@/app/rentalSlice";
 import { Colors } from "@/constants/Colors";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Modal } from "react-native";
 import {
   View,
@@ -11,6 +11,9 @@ import {
   Dimensions,
 } from "react-native";
 import { useDispatch } from "react-redux";
+import * as Notifications from 'expo-notifications';
+import Constants from 'expo-constants';
+
 
 const { width, height } = Dimensions.get("window");
 
@@ -22,6 +25,9 @@ const SignInScreen = ({navigation}) => {
    const [apiError, setApiError] = useState('');
    const dispatch = useDispatch()
    const [loading, setLoading] = useState(false);
+   const [expoToken, setExpoToken] = useState("")
+
+   
  
    // Function to validate inputs
    const validateInputs = () => {
@@ -49,6 +55,33 @@ const SignInScreen = ({navigation}) => {
  
      return isValid;
    };
+
+
+   
+  const getExpoToken=async ()=>{
+    const projectId =
+    Constants?.expoConfig?.extra?.eas?.projectId ?? Constants?.easConfig?.projectId;
+  if (!projectId) {
+    // handleRegistrationError('Project ID not found');
+  }
+  try {
+    const pushTokenString = (
+      await Notifications.getExpoPushTokenAsync({
+        projectId,
+      })
+    ).data;
+    console.log("in login screen",pushTokenString);
+    setExpoToken(pushTokenString)
+  }catch(err){
+    alert(err)
+  }
+  }
+
+
+  useEffect(() => {
+    getExpoToken()
+      }, []);
+
  
    const companies = [
      'G',
@@ -57,14 +90,9 @@ const SignInScreen = ({navigation}) => {
      'Amazon'
    ];
  
-   // Function to handle login API call
    const handleLogin = async () => {
-    // navigation.navigate('Home');
-
      if (!validateInputs()) return;
- 
-    //  navigation.replace("Home");
- 
+
      try {
       setLoading(true);
       const response = await fetch('https://my9ivim6h2.execute-api.us-east-1.amazonaws.com/default/login', {
@@ -72,7 +100,7 @@ const SignInScreen = ({navigation}) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, expoToken }),
       });
 
       const data = await response.json();

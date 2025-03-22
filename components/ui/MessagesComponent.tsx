@@ -1,125 +1,10 @@
 import { Colors } from "@/constants/Colors";
 import { useNavigation } from "@react-navigation/native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, Image, FlatList, StyleSheet, TouchableOpacity, Dimensions } from "react-native";
 import InterestModal from "./InterestModal";
-
-const messagesReceived = [
-  {
-    id: "1",
-    type: "received",
-    name: "John Doe",
-    contact: "+1234567890",
-    email: "abc@google.com",
-    postTitle: "Flat for Rent",
-    postImage: "https://via.placeholder.com/100",
-    message:"I am interested in your property, Can you give me call to discuss on the price and other detials"
-  },
-  {
-    id: "2",
-    type: "received",
-    name: "John Doe",
-    contact: "+1234567890",
-    email: "abc@google.com",
-    postTitle: "Flat for Rent",
-    postImage: "https://via.placeholder.com/100",
-    message:"I am interested in your property, Can you give me call to discuss on the price and other detials"
-
-  },
-  {
-    id: "3",
-    type: "received",
-    name: "John DoeJohn DoeJohn DoeJohn Doe",
-    contact: "+1234567890",
-    email: "abc@google.com",
-    postTitle: "Flat for Rent",
-    postImage: "https://via.placeholder.com/100",
-    message:"I am interested in your property, Can you give me call to discuss on the price and other detials"
-
-  },
-  {
-    id: "4",
-    type: "received",
-    name: "John Doe",
-    contact: "+1234567890",
-    email: "abc@google.com",
-    postTitle: "Flat for Rent",
-    postImage: "https://via.placeholder.com/100",
-    message:"I am interested in your property, Can you give me call to discuss on the price and other detials"
-
-  },
-  {
-    id: "5",
-    type: "received",
-    name: "John Doe",
-    contact: "+1234567890",
-    email: "abc@google.com",
-    postTitle: "Flat for Rent",
-    postImage: "https://via.placeholder.com/100",
-    message:"I am interested in your property, Can you give me call to discuss on the price and other detials"
-
-  },
-  {
-    id: "6",
-    type: "received",
-    name: "John DoeJohn DoeJohn DoeJohn Doe",
-    contact: "+1234567890",
-    email: "abc@google.com",
-    postTitle: "Flat for Rent",
-    postImage: "https://via.placeholder.com/100",
-    message:"I am interested in your property, Can you give me call to discuss on the price and other detials"
-
-  },
-  {
-    id: "7",
-    type: "received",
-    name: "John Doe",
-    contact: "+1234567890",
-    email: "abc@google.com",
-    postTitle: "Flat for Rent",
-    postImage: "https://via.placeholder.com/100",
-    message:"I am interested in your property, Can you give me call to discuss on the price and other detials"
-
-  },
- 
-];
-
-const messagesSent = [
-  {
-    id: "1",
-    type: "sent",
-    name: "You",
-    contact: "+9876543210",
-    email: "abc@google.com",
-    postTitle: "Furniture Items for Sale",
-    postImage: "https://via.placeholder.com/100",
-    message:"I am interested in your property, Can you give me call to discuss on the price and other detials"
-
-  },
-  {
-    id: "2",
-    type: "sent",
-    name: "You",
-    contact: "+9876543210",
-    email: "abc@google.com",
-    postTitle: "Furniture Items for Sale",
-    postImage: "https://via.placeholder.com/100",
-    message:"I am interested in your property, Can you give me call to discuss on the price and other detials"
-
-  },
-  {
-    id: "3",
-    type: "sent",
-    name: "You",
-    contact: "+9876543210",
-    email: "abc@google.com",
-    postTitle: "Furniture Items for Sale",
-    postImage: "https://via.placeholder.com/100",
-    message:"I am interested in your property, Can you give me call to discuss on the price and other detials"
-
-  },
-]
-
+import { useSelector } from "react-redux";
+import { formatTimestamp } from "../Utils";
 
 
 const MessagesScreen = ({selection}) => {
@@ -127,7 +12,67 @@ const MessagesScreen = ({selection}) => {
     const navigation = useNavigation()
     const [modalVisible, setModalVisible] = useState(false);
     const [interestData, setInterestData] = useState({})
+    const userId = useSelector((state) => state.rental.userId);
+    const [messagesReceived, setMessagesReceived] = useState([]);
+    const [messagesSent, setMessagesSent] = useState([]);
+
+
+    useEffect(()=>{
+      getInterests()
+    },[])
+
+
+    useEffect(()=>{
+      console.log("updated messages",messagesReceived)
+    },[messagesReceived])
+
   // const selection= route.params.selection
+
+  const getInterests= async ()=>{
+    console.log("changes")
+    const res= await fetch("https://my9ivim6h2.execute-api.us-east-1.amazonaws.com/default/getInterests?"+userId)
+    const responses = await res.json()
+    console.log(responses)
+    let received = []
+    let sent = []
+    // if(responses){
+      responses.map((interest)=>{
+        console.log("outside interest", interest)
+        if(interest.sender_id==userId){
+          console.log("inside interest", interest)
+          sent = [...sent, {
+              id: interest.id,
+              listingId: interest.listing_id,
+              type: "sent",
+              name: interest.first_name+" "+interest.last_name,
+              contact: interest.mobile_number,
+              email: interest.email,
+              postTitle: interest.listing_title,
+              postImage: interest.image_url.split(",")[0],
+              message: interest.message,
+              createdAt: interest.created_at
+          }]
+        }else{
+          received.push({
+              id: interest.id,
+              type: "received",
+              listingId: interest.listing_id,
+              name: interest.first_name+" "+interest.last_name,
+              contact: interest.mobile_number,
+              email: interest.email,
+              postTitle: interest.listing_title,
+              postImage: interest.image_url.split(",")[0],
+              message: interest.message,
+              createdAt: interest.created_at
+          })
+        }
+      })
+      console.log("received",received)
+      setMessagesReceived([...received]);
+      setMessagesSent([...sent])
+  }
+
+ 
     
 
 
@@ -141,12 +86,12 @@ const MessagesScreen = ({selection}) => {
           <TouchableOpacity onPress={()=>{setInterestData(message); setModalVisible(true)}}>
             <View style={styles.dataContainer}>
             <View style={[styles.box, styles.box1]}>
-            <Image source={require("../../assets/images/favicon.png")} style={styles.profileImage} />
+            <Image source={{uri: message.postImage}} style={styles.profileImage} />
             </View>
             <View style={[styles.box, styles.box2]}>
             <View style={{flexDirection: 'row', width: "100%", overflow: "hidden", paddingRight: 5, justifyContent: "space-between"}}>
             <Text style={{...styles.name, width: "60%", overflow:"hidden"}} numberOfLines={1} ellipsizeMode="tail">{message.name}</Text>
-            <Text style={{fontSize: 12}} numberOfLines={1} ellipsizeMode="tail">10 mins Ago...</Text>
+            <Text style={{fontSize: 12}} numberOfLines={1} ellipsizeMode="tail">{formatTimestamp(message.createdAt)}</Text>
             </View>
             <Text style={styles.contact} numberOfLines={3} ellipsizeMode="tail">{message.message}</Text>
             {/* <Text style={styles.contact}>{message.contact}</Text> */}

@@ -24,11 +24,16 @@ const ProfileScreen = ({navigation}) => {
     email: "",
     mobile: "",
     isEmailVerified: true,
-    aboutMe: ""
+    aboutMe: "",
+    profilePic:""
   });
 
   const [editFields, setEditFields] = useState({}); // Track multiple editable fields
   const [profilePic, setProfilePic] = useState([])
+  const [otp, setOtp] = useState("")
+  const [showOtp, setShowOtp] = useState(false)
+  const [error, setError] = useState("")
+
 
 
   const getProfileData = async ()=>{
@@ -36,7 +41,7 @@ const ProfileScreen = ({navigation}) => {
     const profileData = await response.json()
     console.log(profileData)
     const [preferredcountry, preferredstate] = profileData.preferred_location.split("_")
-    const [street, city, state, pincode, country] = profileData.address.split(",")
+    const [street, city, state, pincode, country] = profileData.address? profileData.address.split("_"): ["","","","",""]
     setAddress({
       street: street,
       city: city,
@@ -54,7 +59,8 @@ const ProfileScreen = ({navigation}) => {
       email: profileData.email,
       mobile: profileData.mobile_number,
       isEmailVerified: true,
-      aboutMe: profileData.about_me
+      aboutMe: profileData.about_me,
+      profilePic: profileData.profile_pic
     })
   }
 
@@ -89,6 +95,12 @@ const ProfileScreen = ({navigation}) => {
     } else if (!/\S+@\S+\.\S+/.test(profileData.email)) {
       newErrors.email = "Enter a valid email.";
     }
+    if(!profileData.isEmailVerified){
+      const newErrors = {}
+      newErrors.email = "Verify the Email to update";
+      setErrors(newErrors)
+      return ""
+    }
 
     if (!profileData.mobile.trim()) {
       newErrors.mobile = "Mobile cannot be empty.";
@@ -105,10 +117,31 @@ const ProfileScreen = ({navigation}) => {
     }));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (validateFields()) {
       setEditFields({});
+      
+      const updatedResponse = await fetch("https://my9ivim6h2.execute-api.us-east-1.amazonaws.com/default/updateProfile",{
+        method:"POST",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body:JSON.stringify({
+          id: userId,
+          "about_me":profileData.aboutMe,
+          email: profileData.email,
+          mobile_number: profileData.mobile,
+          address: Object.values(address).join("_"),
+          preferred_location: preferredLocation.country+"_"+preferredLocation.state,
+          isProfilePicChanged: profilePic.length>0?true:false,
+          profilePic: profilePic.length>0?{base64:"data:image/jpeg;base64,"+profilePic[0].base64, fileName:profilePic[0].fileName}:profilePic,
+          imageUrl: profileData.profilePic
+        })
+      })
+      const res = await updatedResponse.json()
+      console.log(res)
     }
+
   };
 
   const pickImage = async () => {
@@ -117,6 +150,7 @@ const ProfileScreen = ({navigation}) => {
         allowsMultipleSelection: false,
         allowsEditing: true,
         aspect: [1,1],
+        base64: true,
         quality: 1,
         
       });
@@ -129,11 +163,44 @@ const ProfileScreen = ({navigation}) => {
       } 
     };
 
+    const getOTP = async () =>{
+      setError("")
+      console.log("getOTP")
+      const response = await fetch("https://icpskvho6d.execute-api.us-east-1.amazonaws.com/default/getOTP",{method:"POST", headers: {
+        'Content-Type': 'application/json',
+      },body:JSON.stringify({email:profileData.email})})
+      const data = await response.json();
+      console.log("getOTP",data)
+      setShowOtp(true)
+    }
+
+    const verifyEmail = async () =>{
+      console.log( {
+        email: profileData.email,
+        otp: otp
+      })
+      const response = await fetch('https://my9ivim6h2.execute-api.us-east-1.amazonaws.com/default/verifyEmail', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: profileData.email,
+          otp: otp
+        })
+      })
+      const res = await response.json()
+      if(res.message == "OTP verified successfully"){
+        setProfileData({...profileData, isEmailVerified:true })
+      }
+      console.log("res",res)
+    }
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.profileContainer}>
         <Image
-          source={{ uri: profilePic[0]?.uri }}
+          source={{ uri: profilePic.length==0?profileData.profilePic:profilePic[0]?.uri }}
           style={styles.profilePic}
           placeholder={{blurhash}}
         />
@@ -171,11 +238,20 @@ const ProfileScreen = ({navigation}) => {
         }
         error={errors.email}
         extra={
+          <TouchableOpacity onPress={()=>{if(!profileData.isEmailVerified){ getOTP()}}}>
           <Text style={profileData.isEmailVerified ? styles.verified : styles.verifyPending}>
             {profileData.isEmailVerified ? "✔ Verified" : "Verify Email"}
           </Text>
+          </TouchableOpacity>
         }
       />
+      {showOtp&& <View style={{flexDirection:"row"}}><TextInput placeholder="Enter OTP" style={{width: "75%",backgroundColor:"#fff", borderWidth: 1,
+          borderColor: '#ccc',
+          borderRadius: 5,}} value={otp} onChangeText={(text)=>{setOtp(text)}}></TextInput>
+           <TouchableOpacity style={styles.submitButton} onPress={verifyEmail}>
+                  <Text style={styles.submitButtonText}>Verify</Text>
+                </TouchableOpacity>
+      </View>}
 
       <ProfileField
         label="Mobile"
@@ -189,7 +265,7 @@ const ProfileScreen = ({navigation}) => {
 
       <ProfileField
         label="Address"
-        value={Object.values(address).join(", ")}
+        value={Object.values(address).join(" ").length==4?"-":Object.values(address).join(" ")}
         editable
         isEditing={editFields.address}
         onEdit={() => handleEditToggle("address")}
@@ -207,7 +283,7 @@ const ProfileScreen = ({navigation}) => {
 
       <ProfileField
         label="Preferred Location"
-        value={Object.values(preferredLocation).join(", ")}
+        value={Object.values(preferredLocation).join(" ")}
         editable
         isEditing={editFields.preferredLocation}
         onEdit={() => handleEditToggle("preferredLocation")}
@@ -233,6 +309,13 @@ const ProfileScreen = ({navigation}) => {
         </TouchableOpacity>
       </View>
 
+      {Object.values(editFields).includes(true) && (
+        <TouchableOpacity style={styles.submitBtn} onPress={handleSave}>
+          <Text style={styles.submitText}>Update</Text>
+        </TouchableOpacity>
+      )}
+
+
       <TouchableOpacity style={{...styles.button,marginTop:25, marginHorizontal:"20%", backgroundColor:"#E2062B"}} onPress={()=>{ navigation.reset({
             index: 0,
             routes: [{ name: 'Login' }]
@@ -241,11 +324,7 @@ const ProfileScreen = ({navigation}) => {
         </TouchableOpacity>
 
       {/* Submit Button */}
-      {Object.values(editFields).includes(true) && (
-        <TouchableOpacity style={styles.submitBtn} onPress={handleSave}>
-          <Text style={styles.submitText}>Update</Text>
-        </TouchableOpacity>
-      )}
+      
     </ScrollView>
   );
 };
@@ -300,6 +379,21 @@ const styles = StyleSheet.create({
   buttonText: { color: "#fff" },
   submitBtn: { marginTop: 20, padding: 10, backgroundColor: Colors.primary, borderRadius: 5, alignItems: "center" },
   submitText: { color: "#fff", fontWeight: "bold" },
+
+  submitButton: {
+    backgroundColor: Colors.primary,
+    padding: 5,
+    height: 39,
+    borderRadius: 8,
+    alignItems: "center",
+    // width: "10%",
+    marginHorizontal: "auto"
+  },
+  submitButtonText: {
+    color: "#fff",
+    fontSize: 18,
+    paddingHorizontal:5
+  },
 });
 
 export default ProfileScreen;

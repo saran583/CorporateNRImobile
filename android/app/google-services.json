@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "291935358691",
+    "project_id": "corporatenri-5fb40",
+    "storage_bucket": "corporatenri-5fb40.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:291935358691:android:03a5a843afc53af96affd6",
+        "android_client_info": {
+          "package_name": "corporate.nri"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAbKhA823qJweqb03fy7iR1y2D322t39d8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

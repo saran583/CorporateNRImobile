@@ -9,6 +9,8 @@ import { View, Text, TextInput, StyleSheet, Image, ScrollView, TouchableOpacity,
 import { ToastAndroid,AlertIOS } from "react-native";
 import { useSelector } from "react-redux";
 import { ActivityIndicator } from "react-native";
+import awsConfig from "../../aws-config.js"
+import { RNS3 } from "react-native-aws3";
 
 const OtherRentalForm = () => {
     const [form, setForm] = useState({
@@ -38,22 +40,40 @@ const OtherRentalForm = () => {
     '|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[';
   
 
-  // const pickImage = async () => {
-  //   let result = await ImagePicker.launchCameraAsync({
-  //     mediaTypes: ['images'],
-  //     allowsMultipleSelection: true,
-  //     allowsEditing: true,
-  //     aspect: [4, 3],
-  //     quality: 1,
+  const uploadImageToS3 = async (images) => {
+        const uploadPromises = images.map(async (image) => {
+          const file = {
+            uri: image.uri,
+            name: `upload_${Date.now()}_${Math.random()}.jpg`,
+            type: "image/jpeg",
+          };
       
-  //   });
-
-  //   console.log(result);
-
-  //   if (!result.canceled) {
-  //     setPictures(result.assets);
-  //   } 
-  // };
+          const options = {
+            keyPrefix: "uploads/", // S3 folder
+            bucket: awsConfig.bucket,
+            region: awsConfig.region,
+            accessKey: awsConfig.accessKey,
+            secretKey: awsConfig.secretKey,
+            successActionStatus: 201, // Required for success
+          };
+      
+          try {
+            const response = await RNS3.put(file, options);
+            if (response.status !== 201) throw new Error("Upload failed");
+            return response.body.postResponse.location; // Return the uploaded image URL
+          } catch (error) {
+            console.error("Upload Error:", error);
+            return null; // Return null for failed uploads
+          }
+        });
+      
+        // Wait for all uploads to finish
+        const uploadedUrls = await Promise.all(uploadPromises);
+        console.log(uploadedUrls)
+        
+        // Filter out any null (failed uploads)
+        return uploadedUrls.filter((url) => url !== null);
+      };
 
   const pickImage = async () => {
     Alert.alert("Select Image", "Choose an option", [
@@ -68,7 +88,6 @@ const OtherRentalForm = () => {
       mediaTypes: ["images"],
       allowsEditing: true,
       aspect: [4, 3],
-      base64: true,
       quality: 1,
     });
 
@@ -82,7 +101,6 @@ const OtherRentalForm = () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
       allowsEditing: true,
-      base64: true,
       allowsMultipleSelection: true,
       aspect: [4, 3],
       quality: 1,
@@ -118,17 +136,15 @@ const OtherRentalForm = () => {
 
     if (Object.keys(newErrors).length === 0) {
       console.log("Form Submitted:", form);
-      const base64Images = pictures.map((picture)=>{
-        return {base64:"data:image/jpeg;base64,"+picture.base64, fileName:picture.fileName}
-      })
+     
       setLoading(true)
-
+      const imagesUrls = await uploadImageToS3(pictures)
       const response = await fetch('https://my9ivim6h2.execute-api.us-east-1.amazonaws.com/default/createOtherListing', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
               },
-              body: JSON.stringify({ categoryId:3, createdBy: userId, ...form, pictures:base64Images}),
+              body: JSON.stringify({ categoryId:3, createdBy: userId, ...form, pictures:imagesUrls.join(",")}),
             });
       
             const data = await response.json();

@@ -24,14 +24,17 @@ export default function HomeScreen() {
   const [featuredLoading, setFeaturedLoading] = useState(true)
 
   const [refreshing, setRefreshing] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState("0");
 
 
 
   const onRefresh = () =>{
     setRefreshing(true);
-    getFeaturedPosts();
-    getDashboardPosts();
-    getLatestPosts()
+    getFeaturedPosts(selectedCategory);
+    getDashboardPosts(selectedCategory);
+    getLatestPosts(selectedCategory);
+    setCurrentIndex(0);
+    flatListRef.current?.scrollToIndex({ animated: true, index: 0 });
     setTimeout(() => {
       setRefreshing(false);
     }, 2000);
@@ -48,9 +51,20 @@ export default function HomeScreen() {
 
   },[])
 
-  const getFeaturedPosts = async()=>{
+
+  
+  
+  const updateSelectedCategory = (newValue) =>{
+    getFeaturedPosts(newValue);
+    getDashboardPosts(newValue);
+    getLatestPosts(newValue)
+    setSelectedCategory(newValue)
+  }
+    
+
+  const getFeaturedPosts = async(filter=selectedCategory)=>{
       console.log("entered get today posts api")
-      let response = await fetch("https://my9ivim6h2.execute-api.us-east-1.amazonaws.com/default/getFeaturedPosts")
+      let response = await fetch("https://my9ivim6h2.execute-api.us-east-1.amazonaws.com/default/getFeaturedPosts?"+filter)
       const postResponse = await response.json();
       
       console.log(postResponse)
@@ -61,9 +75,9 @@ export default function HomeScreen() {
       setFeaturedLoading(false);
     }
 
-    const getDashboardPosts = async()=>{
+    const getDashboardPosts = async(filter=selectedCategory)=>{
       console.log("entered get today posts api")
-      let response = await fetch("https://my9ivim6h2.execute-api.us-east-1.amazonaws.com/default/getDashboardPosts")
+      let response = await fetch("https://my9ivim6h2.execute-api.us-east-1.amazonaws.com/default/getDashboardPosts?"+filter)
       const postResponse = await response.json();
       
       console.log(postResponse)
@@ -75,9 +89,9 @@ export default function HomeScreen() {
 
     }
 
-    const getLatestPosts = async()=>{
+    const getLatestPosts = async(filter=selectedCategory)=>{
       console.log("entered get today posts api")
-      let response = await fetch("https://my9ivim6h2.execute-api.us-east-1.amazonaws.com/default/getLatestPosts")
+      let response = await fetch("https://my9ivim6h2.execute-api.us-east-1.amazonaws.com/default/getLatestPosts?"+filter)
       const postResponse = await response.json();
       
       console.log(postResponse)
@@ -133,7 +147,7 @@ export default function HomeScreen() {
 
   return (
     <View style={{backgroundColor: Colors.secondary}}>
-    <CategoryTabs></CategoryTabs>
+    <CategoryTabs selectedCategory={selectedCategory} updateSelectedCategory={updateSelectedCategory}></CategoryTabs>
     <ScrollView style={styles.homeContainer} 
      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
    <View style={styles.container}>

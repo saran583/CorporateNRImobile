@@ -10,11 +10,20 @@ export default function TabFourScreen() {
   const navigation = useNavigation()
   const [loading, setLoading] = useState(true);
   const [posts, setPosts] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState("0");
+
+
 
   
-  const getTodayPosts = async()=>{
+    const updateSelectedCategory = (newValue) =>{
+      getTodayPosts(newValue)
+      setSelectedCategory(newValue)
+    }
+
+  
+  const getTodayPosts = async(filter=selectedCategory)=>{
     console.log("entered get today posts api")
-    let response = await fetch("https://my9ivim6h2.execute-api.us-east-1.amazonaws.com/default/getTodayPosts")
+    let response = await fetch("https://my9ivim6h2.execute-api.us-east-1.amazonaws.com/default/getTodayPosts?"+filter)
     const postResponse = await response.json();
     
     console.log(postResponse)
@@ -26,7 +35,7 @@ export default function TabFourScreen() {
   }
 
   useEffect(()=>{
-    getTodayPosts();
+    getTodayPosts(selectedCategory);
   },[])
   return loading ==true ? <View style={{backgroundColor: Colors.secondary, height: "100%", paddingBottom:10}}>
 
@@ -47,7 +56,7 @@ export default function TabFourScreen() {
         )}
       />
   </View>:
-    <CardLayout posts={posts} onRefreshCalled={getTodayPosts} />
+    <CardLayout posts={posts} onRefreshCalled={getTodayPosts}  selectedCategory={selectedCategory} updateSelectedCategory={updateSelectedCategory} />
     }
 
 const styles = StyleSheet.create({

@@ -22,6 +22,8 @@ import * as ImagePicker from 'expo-image-picker';
 import { Colors } from "@/constants/Colors";
 import { useSelector } from "react-redux";
 import { ActivityIndicator } from "react-native";
+import awsConfig from "../../aws-config.js"
+import { RNS3 } from "react-native-aws3";
 
 const UtilityRental = () => {
   const [type, setType] = useState("");
@@ -85,7 +87,6 @@ futureDate.setDate(futureDate.getDate() + 10);
         mediaTypes: ["images"],
         allowsEditing: true,
         aspect: [4, 3],
-        base64: true,
         quality: 1,
       });
   
@@ -101,7 +102,6 @@ futureDate.setDate(futureDate.getDate() + 10);
         allowsEditing: true,
         allowsMultipleSelection: true,
         aspect: [4, 3],
-        base64: true,
         quality: 1,
       });
   
@@ -109,6 +109,41 @@ futureDate.setDate(futureDate.getDate() + 10);
             setPictures(result.assets);
           }
     };
+
+    const uploadImageToS3 = async (images) => {
+          const uploadPromises = images.map(async (image) => {
+            const file = {
+              uri: image.uri,
+              name: image.fileName,
+              type: "image/jpeg",
+            };
+        
+            const options = {
+              keyPrefix: "uploads/", // S3 folder
+              bucket: awsConfig.bucket,
+              region: awsConfig.region,
+              accessKey: awsConfig.accessKey,
+              secretKey: awsConfig.secretKey,
+              successActionStatus: 201, // Required for success
+            };
+        
+            try {
+              const response = await RNS3.put(file, options);
+              if (response.status !== 201) throw new Error("Upload failed");
+              return response.body.postResponse.location; // Return the uploaded image URL
+            } catch (error) {
+              console.error("Upload Error:", error);
+              return null; // Return null for failed uploads
+            }
+          });
+        
+          // Wait for all uploads to finish
+          const uploadedUrls = await Promise.all(uploadPromises);
+          console.log(uploadedUrls)
+          
+          // Filter out any null (failed uploads)
+          return uploadedUrls.filter((url) => url !== null);
+        };
 
   // Add a new utility item
   const addUtility = () => {
@@ -149,7 +184,7 @@ futureDate.setDate(futureDate.getDate() + 10);
         const extension = parts.length > 1 ? parts.pop() : ''; // Extract extension if present
         const baseName = parts.join('.'); // Join the rest back in case there are multiple dots in the name
         return {
-          base64: "data:image/jpeg;base64,"+pic.base64,
+          ...pic,
           fileName: `${baseName}-${item.itemName}.${extension}`
         };
       })
@@ -177,16 +212,18 @@ futureDate.setDate(futureDate.getDate() + 10);
       additionalInfo,
       utilities,
     };
-    const pictures = extractPictures(utilities)
     setLoading(true)
-    console.log("payload", JSON.stringify({ categoryId:2, createdBy:userId, listingCategory:type, location:location, pinCode:pinCode, availableFrom: fromDate, availableTo: toDate, additionalDetails:additionalInfo, utilities:utilities, pictures:pictures}));
+
+    const pictures = extractPictures(utilities)
+    const imagesUrls = await uploadImageToS3(pictures)
+    // console.log("payload", JSON.stringify({ categoryId:2, createdBy:userId, listingCategory:type, location:location, pinCode:pinCode, availableFrom: fromDate, availableTo: toDate, additionalDetails:additionalInfo, utilities:utilities, pictures:pictures}));
 
     const response = await fetch('https://my9ivim6h2.execute-api.us-east-1.amazonaws.com/default/createUtility', {
                   method: 'POST',
                   headers: {
                     'Content-Type': 'application/json',
                   },
-                  body: JSON.stringify({ categoryId:2, createdBy:userId, listingCategory:type, location:location, pinCode:pinCode, availableFrom: fromDate, availableTo: toDate, additionalDetails:additionalInfo, utilities:utilities, pictures:pictures}),
+                  body: JSON.stringify({ categoryId:2, createdBy:userId, listingCategory:type, location:location, pinCode:pinCode, availableFrom: fromDate, availableTo: toDate, additionalDetails:additionalInfo, utilities:utilities, pictures:imagesUrls.join(",")}),
                 });
           
                 const data = await response.json();

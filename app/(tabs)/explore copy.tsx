@@ -18,10 +18,19 @@ export default function TabThreeScreen() {
   const [loading, setLoading] = useState(true);
   const [posts, setPosts] = useState([]);
 
+
+    const [selectedCategory, setSelectedCategory] = useState("0");
+    
+    const updateSelectedCategory = (newValue) =>{
+      getFeaturedPosts(newValue)
+      setSelectedCategory(newValue)
+    }
   
-  const getFeaturedPosts = async()=>{
+
+  
+  const getFeaturedPosts = async(filter = selectedCategory)=>{
     console.log("entered get today posts api")
-    let response = await fetch("https://my9ivim6h2.execute-api.us-east-1.amazonaws.com/default/getFeaturedPosts")
+    let response = await fetch("https://my9ivim6h2.execute-api.us-east-1.amazonaws.com/default/getFeaturedPosts?"+filter)
     const postResponse = await response.json();
     
     console.log(postResponse)
@@ -54,7 +63,7 @@ export default function TabThreeScreen() {
         )}
       />
   </View>:
-    <CardLayout posts={posts} onRefreshCalled={getFeaturedPosts} />
+    <CardLayout posts={posts} onRefreshCalled={getFeaturedPosts} selectedCategory={selectedCategory} updateSelectedCategory={updateSelectedCategory} />
   
 }
 

@@ -11,10 +11,21 @@ export default function TabTwoScreen() {
   const [loading, setLoading] = useState(true);
   const [posts, setPosts] = useState([]);
 
+  const [selectedCategory, setSelectedCategory] = useState("0");
+
+
+
   
-  const getLatestPosts = async()=>{
+  const updateSelectedCategory = (newValue) =>{
+    getLatestPosts(newValue)
+    setSelectedCategory(newValue)
+  }
+
+
+  
+  const getLatestPosts = async(filter=selectedCategory)=>{
     console.log("entered get today posts api")
-    let response = await fetch("https://my9ivim6h2.execute-api.us-east-1.amazonaws.com/default/getLatestPosts")
+    let response = await fetch("https://my9ivim6h2.execute-api.us-east-1.amazonaws.com/default/getLatestPosts?"+filter)
     const postResponse = await response.json();
     
     console.log(postResponse)
@@ -47,7 +58,7 @@ export default function TabTwoScreen() {
         )}
       />
   </View>:
-    <CardLayout posts={posts} onRefreshCalled={getLatestPosts} />
+    <CardLayout posts={posts} onRefreshCalled={getLatestPosts} selectedCategory={selectedCategory} updateSelectedCategory={updateSelectedCategory}/>
   
 }
 

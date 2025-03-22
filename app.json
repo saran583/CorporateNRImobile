@@ -16,7 +16,8 @@
         "foregroundImage": "./assets/images/appLogo.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "corporate.nri"
+      "package": "corporate.nri",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "bundler": "metro",
