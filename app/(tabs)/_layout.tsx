@@ -1,5 +1,4 @@
 import { Tabs } from 'expo-router';
-import React from 'react';
 import { Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { HapticTab } from '@/components/HapticTab';
@@ -11,15 +10,15 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import { FloatingAction } from "react-native-floating-action";
 import { useNavigation } from '@react-navigation/native';
-import ProfileIcon from '@/components/ui/ProfileIcon';
 import { useSelector } from 'react-redux';
+import React, { useState, useEffect, useRef } from 'react';
+import ProfileIcon from '@/components/ui/ProfileIcon';
 
 
 export default function TabLayout() {
   // const colorScheme = useColorScheme();
   const navigation = useNavigation();
   const userName = useSelector((state) => state.rental.userName);
-
 
 
   const actions = [
