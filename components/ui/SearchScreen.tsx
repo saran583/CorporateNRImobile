@@ -18,9 +18,26 @@ import { filterPosts } from "../Utils";
 export default function SearchComponent() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredData, setFilteredData] = useState([]);
+  const [allResults, setAllResults] = useState([]);
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const [selectedType, setSelectedType] = useState(null);
   const navigation = useNavigation()
+
+  const [selectedCategory, setSelectedCategory] = useState("0");
+
+
+  
+  const updateSelectedCategory = (newValue) =>{
+    setSelectedCategory(newValue)
+    if(newValue === "0"){
+      setFilteredData(allResults)
+      return ""
+    }
+    const newData = allResults.filter(post=>
+      post.category == parseInt(newValue))
+    setFilteredData(newData)
+    
+  }
 
   // Update the displayed data based on search and filter
   const updateFilteredData = async (query, type) => {
@@ -29,7 +46,16 @@ export default function SearchComponent() {
     console.log("result", postResults)
     let filteredResults = await filterPosts(postResults)
     console.log(filteredResults)
-    setFilteredData(filteredResults)
+    setAllResults(filteredResults)
+    if(selectedCategory==="0"){
+      setFilteredData(filteredResults)
+    }
+    else{
+      const newData = filteredResults.filter(post=>
+        post.category == parseInt(selectedCategory))
+      setFilteredData(newData)
+
+    }
   };
 
   // Handle Search Input
@@ -42,7 +68,6 @@ export default function SearchComponent() {
   const handleTypeSelection = (type) => {
     setSelectedType(type);
     setDropdownVisible(false);
-    updateFilteredData(searchQuery, type);
   };
 
   // Clear Filter
@@ -113,13 +138,17 @@ export default function SearchComponent() {
       {/* Cards List */}
       {/* <View> */}
         <View style={{backgroundColor: Colors.secondary, paddingBottom:10}}>
-        <CategoryTabs></CategoryTabs>
+        <CategoryTabs selectedCategory={selectedCategory} updateSelectedCategory={updateSelectedCategory} ></CategoryTabs>
         </View>
+        {filteredData.length==0?
+        <View style={{margin:"auto"}}>
+          <Text style={{textAlign:"center", margin:"auto"}}>No Records Available...</Text>
+        </View>:
       <FlatList
         data={filteredData}
         keyExtractor={(item) => item.id}
         renderItem={(item) =>renderCards(item)}
-      />
+      />}
       {/* </View> */}
     </View>
   );

@@ -48,7 +48,6 @@ export default function HomeScreen() {
     getFeaturedPosts();
     getDashboardPosts();
     getLatestPosts()
-
   },[])
 
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Button, StyleSheet, TextInput, TouchableOpacity, ScrollView, Modal, ActivityIndicator } from 'react-native';
+import { View, Text, Button, StyleSheet, TextInput, TouchableOpacity, ScrollView, Modal, ActivityIndicator, Platform, ToastAndroid, AlertIOS } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import { Colors } from '@/constants/Colors';
 // import RNPickerSelect from 'react-native-picker-select';
@@ -27,6 +27,8 @@ const SignUpPage = ({navigation}) => {
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch()
   const [showError, setShowError] = useState("")
+  const [resendOtp, setResendOtp] = useState(false)
+
 
   
 
@@ -34,7 +36,7 @@ const SignUpPage = ({navigation}) => {
   const [form, setForm] = useState({
         dateOfBirth: new Date(),
         gender: "",
-        country: "",
+        country: "USA",
         state: ""
       });
   const [errors, setErrors] = useState({});
@@ -53,6 +55,9 @@ const SignUpPage = ({navigation}) => {
         newErrors[key] = "This field is required";
       }
     });
+    if(!agreeTerms){
+      newErrors["agreeTerms"] = "Please agree to the terms and conditions"
+    }
 
     setErrors(newErrors);
     console.log("Form Submitted:", newErrors);
@@ -105,17 +110,47 @@ const SignUpPage = ({navigation}) => {
       
   }
 
+  const getOTP = async () =>{
+    const response = await fetch("https://icpskvho6d.execute-api.us-east-1.amazonaws.com/default/getOTP",{method:"POST", headers: {
+      'Content-Type': 'application/json',
+    },body:JSON.stringify({email:control._formValues.email})})
+    const data = await response.json();
+    if (Platform.OS === 'android') {
+      ToastAndroid.show("OTP sent !", ToastAndroid.SHORT)
+    } else {
+      AlertIOS.alert("OTP sent !");
+    }
+    console.log("changes",data)
+    setLoading(false);
+    setShowOTP(true)
+    setTimeout(() => {
+      setResendOtp(true)
+    }, 5000);
+  }
+
 
   const onSubmit = async (data) => {
       
       
     if(!showOTP){
-      const response = await fetch("https://icpskvho6d.execute-api.us-east-1.amazonaws.com/default/getOTP",{method:"POST", headers: {
+    setLoading(true);
+      const response = await fetch("https://my9ivim6h2.execute-api.us-east-1.amazonaws.com/default/verifyUser",{method:"POST", headers: {
         'Content-Type': 'application/json',
-      },body:JSON.stringify({email:control._formValues.email})})
+      },body:JSON.stringify({email:control._formValues.email, mobileNumber: control._formValues.mobileNumber})})
       const data = await response.json();
-      console.log("changes",data)
-      setShowOTP(true)
+      console.log("res>",data)
+      if(data.message==="Email already registered"){
+        setShowError("Email is already registered try logging in")
+        setLoading(false)
+      }
+      else if(data.message==="Mobile Number already registered"){
+        setShowError("Mobile number is already registered try logging in with that account")
+        setLoading(false)
+      }
+      else if(data.message === "Success"){
+        getOTP();
+      }
+      
     }
     else {
       SignUp(data)
@@ -472,11 +507,12 @@ const SignUpPage = ({navigation}) => {
         <View style={styles.checkboxContainer}>
         <Checkbox
           status={agreeTerms ? 'checked' : 'unchecked'}
-          onPress={() => setAgreeTerms(!agreeTerms)}
+          onPress={() => {setAgreeTerms(!agreeTerms); setErrors((prevErrors) => ({ ...prevErrors, agreeTerms: null }));}}
           color={Colors.primary}
         />
         <Text style={styles.checkboxLabel}>Agree to Terms and Conditions</Text>
       </View>
+      {errors.agreeTerms && <Text style={{color:"red", fontSize:12, marginTop:-15, marginBottom:20}}>{errors.agreeTerms}</Text>}
       
 
 
@@ -488,10 +524,10 @@ const SignUpPage = ({navigation}) => {
           <Controller
             control={control}
             rules={{
-              required: 'Mobile number is required',
+              required: 'OTP is required',
               pattern: {
-                value: /^[0-9]{10}$/,
-                message: 'Enter a valid 10-digit mobile number',
+                value: /^[0-9]{6}$/,
+                message: 'Enter a valid OTP',
               },
             }}
             render={({ field: { onChange, onBlur, value } }) => (
@@ -506,9 +542,17 @@ const SignUpPage = ({navigation}) => {
             )}
             name="otp"
           />
-          {errors.mobileNumber && <Text style={styles.error}>{errors.otp}</Text>}
-          {showError}
+          {errors.otp && <Text style={styles.error}>{errors.otp}</Text>}
+          {resendOtp && <>
+            <Text style={{fontSize: 13, marginLeft:5}}>Kindly check your spam or junk folder if you do not see the OTP email in your inbox.</Text>
+            <TouchableOpacity onPress={()=>{getOTP()}}>
+              <Text  style={{color:Colors.primary, fontSize:16, width: '100%', textAlign: "right",  textDecorationLine: "underline"}}>Resend OTP</Text>
+            </TouchableOpacity>
+          </>}
         </View>}
+        <Text style={{...styles.error,textAlign:"center", fontSize:14}}>
+          {showError}
+          </Text>
 
         <TouchableOpacity style={styles.submitButton} onPress={()=>{handleSubmitCheck(); return handleSubmit(onSubmit)}}>
           <Text style={styles.submitText}> { showOTP?"Sign Up":"Verify Email"}</Text>
@@ -667,6 +711,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333',
   },
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)', // Dark semi-transparent background
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loaderContainer: {
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  text: {
+    color: '#fff',
+    marginTop: 10,
+    fontSize: 16,
+  }
 });
 
 

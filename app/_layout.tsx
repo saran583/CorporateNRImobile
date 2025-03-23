@@ -255,7 +255,7 @@ try{
             headerTitleStyle: { fontWeight: "bold" },
           }} />
           <Stack.Screen name="DetailPage" component={PropertyDetails}  options={{
-            headerTitle: "Rental Detail Page",
+            headerTitle: "Detail Page",
             headerStyle: { backgroundColor: Colors.primary },
             headerTintColor: "#fff",
             headerTitleStyle: { fontWeight: "bold" },

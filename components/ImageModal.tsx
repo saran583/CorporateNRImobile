@@ -1,12 +1,22 @@
 import { Colors } from "@/constants/Colors";
 import React, { useState } from "react";
-import { View, Text, Modal, Image, TouchableOpacity, Linking, StyleSheet, Dimensions } from "react-native";
+import { View, Text, Modal, Image, TouchableOpacity, Linking, StyleSheet, Dimensions  } from "react-native";
 import Icon from 'react-native-vector-icons/MaterialIcons'; 
 
 const { width } = Dimensions.get("window");
 
 const ImageModal = ({ onClose, images, product }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  
+
+  const handlePress = async (url) => {
+    const supported = await Linking.canOpenURL(url);
+    if (supported) {
+      await Linking.openURL(url);
+    } else {
+      console.log("Cannot open URL: " + url);
+    }
+  };
 
   return (
     <Modal visible={true} transparent animationType="slide">
@@ -16,7 +26,7 @@ const ImageModal = ({ onClose, images, product }) => {
           <Text style={{...styles.name, textAlign:"left", width:"100%"}}>Name: {product.name}</Text>
           <Text style={{...styles.price, textAlign:"left", width:"100%"}}>Price: {product.price}</Text>
           <Text style={{...styles.status, textAlign:"left", width:"100%"}}>Availability: {product.availability ? "Available" : "Out of Stock"}</Text>
-          <TouchableOpacity onPress={() => Linking.openURL(product.storeLink)}>
+          <TouchableOpacity onPress={() => handlePress(product.storeLink)}>
             <Text style={styles.storeLink}>Visit Store</Text>
           </TouchableOpacity>
 

@@ -170,8 +170,9 @@ const renderCard = (navigation, post, width=Dimensions.get('window').width * 0.9
     },
     features: {
       flexDirection: 'row',
-      flexWrap: 'wrap',
+      // flexWrap: 'wrap',
       marginVertical: 5,
+      overflow: "scroll"
     },
     featureBadge: {
       backgroundColor: Colors.secondary,

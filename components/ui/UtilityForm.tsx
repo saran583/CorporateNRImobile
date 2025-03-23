@@ -106,7 +106,7 @@ futureDate.setDate(futureDate.getDate() + 10);
       });
   
       if (!result.canceled) {
-            setPictures(result.assets);
+            setPictures([...pictures, ...result.assets]);
           }
     };
 

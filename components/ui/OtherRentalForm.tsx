@@ -109,7 +109,7 @@ const OtherRentalForm = () => {
     if (!result.canceled) {
       // console.log("image result", result)
       console.log(result.assets["0"].mimeType)
-          setPictures(result.assets);
+          setPictures([...pictures, ...result.assets]);
         }
   };
 

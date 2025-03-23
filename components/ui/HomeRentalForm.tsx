@@ -95,7 +95,7 @@ const HomeRentalForm = () => {
       });
   
       if (!result.canceled) {
-            handleInputChange("pictures",result.assets);
+            handleInputChange("pictures",[...form.pictures, ...result.assets]);
           }
     };
 
@@ -156,7 +156,7 @@ const HomeRentalForm = () => {
     const newErrors = {};
     let nonValidationKeys = ["additionalDetails", "petsAllowed", "smokingAllowed"]
     let rentalKeys = ["monthlyRent", "deposit", "rentalDuration", "duration", "preferredGender", "foodPreference","rentalType"]
-    let saleKeys = ["salePrice", "advance"]
+    let saleKeys = ["salePrice", "advance", "nearBySchools"]
     let skipableKeys = [...nonValidationKeys, ...form.listingCategory==="Rent"?saleKeys:rentalKeys]
     Object.keys(form).forEach((key) => {
       if (skipableKeys.includes(key)==false && form[key].toString().trim() === "") {

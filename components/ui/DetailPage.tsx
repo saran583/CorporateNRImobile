@@ -39,13 +39,13 @@ const PropertyDetails = ({route}) => {
 
   const CardData =(postDetail,index)=>{
     let imageUrl = []
-    post.images.map((image)=>{
+    post.images.map((image,i)=>{
       if(image.indexOf(encodeURIComponent(postDetail.name))>0){
         imageUrl.push(image)
       }
       return image
     })
-    return  <TouchableOpacity onPress={()=>{onShowModal({product:postDetail, images:imageUrl})}}>
+    return  <TouchableOpacity key={index}  onPress={()=>{onShowModal({product:postDetail, images:imageUrl})}}>
     <View style={styles.card} key={index}>
     <View style={styles.textContainer}>
       <Text style={styles.utility_title}>Item Name: {postDetail.name}</Text>

@@ -2,7 +2,10 @@ import { Colors } from "@/constants/Colors";
 import React, { useState, useEffect } from "react";
 import { 
   Modal, View, Text, Image, TouchableOpacity, StyleSheet, Animated, Easing, 
-  TextInput
+  TextInput,
+  Platform,
+  ToastAndroid,
+  AlertIOS
 } from "react-native";
 import { useSelector } from "react-redux";
 
@@ -38,6 +41,11 @@ const InterestModal = ({ onClose, postDetail }) => {
     
           const data = await response.json();
           console.log(data)
+           if (Platform.OS === 'android') {
+                    ToastAndroid.show("Interest Sent Successfully", ToastAndroid.SHORT)
+                  } else {
+                    AlertIOS.alert("Interest Sent Successfully");
+                  }
           console.log({listingId:postDetail.listingId, hostId:postDetail.hostId, senderId:userId, message:formData.message, companyName: formData.company})
           // onSend(formData);
           setFormData({ name: "", mobile: "", message: "", company: "" }); // Reset fields
