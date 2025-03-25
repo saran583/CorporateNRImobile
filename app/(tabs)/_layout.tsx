@@ -19,6 +19,25 @@ export default function TabLayout() {
   // const colorScheme = useColorScheme();
   const navigation = useNavigation();
   const userName = useSelector((state) => state.rental.userName);
+  const userId = useSelector((state) => state.rental.userId);
+  const [hasMessages, setHasMessages] = useState(false)
+
+  const getInterests = async() => {
+  const res= await fetch("https://my9ivim6h2.execute-api.us-east-1.amazonaws.com/default/getUnReadInterestsCount?"+userId)
+    const responses = await res.json()
+    console.log("user interests",responses)
+    if(parseInt(responses) && parseInt(responses)>0){
+      setHasMessages(true)
+    }
+    else{
+      setHasMessages(false)
+    }
+ }
+  useEffect( ()=>{
+    const intervalId = setInterval(getInterests, 10000);
+
+    return () => clearInterval(intervalId);
+  },[])
 
 
   const actions = [
@@ -69,9 +88,9 @@ export default function TabLayout() {
                   <TouchableOpacity onPress={() => {navigation.navigate("MessagesPage")}}>
                     <View style={styles.messageContainer}>
                       <Icon name="message" size={25} color="#fff" />
-                        <View style={styles.messageBadge}>
-                          <Text style={styles.badgeText}>5</Text>
-                        </View>
+                      {hasMessages&&<View style={styles.messageBadge}>
+                          <Text style={styles.badgeText}></Text>
+                        </View>}
                     </View>
                   </TouchableOpacity>
                 </View>
@@ -198,12 +217,12 @@ const styles=StyleSheet.create({
   },
   messageBadge: {
     position: 'absolute',
-    top: -10,
-    right: -8,
+    top: -7,
+    right: -6,
     backgroundColor: '#ff3b30',
     borderRadius: 10,
-    width: 18,
-    height: 18,
+    width: 15,
+    height: 15,
     justifyContent: 'center',
     alignItems: 'center',
   }

@@ -50,7 +50,9 @@ const PropertyDetails = ({route}) => {
     <View style={styles.textContainer}>
       <Text style={styles.utility_title}>Item Name: {postDetail.name}</Text>
       <Text style={styles.description}>Price: {postDetail.price}</Text>
-      <Text style={styles.description}>Link: {postDetail.storeLink}</Text>
+      <Text style={{...styles.description, textAlign:"left", width:"100%"}}>Availability: {postDetail.availabilityStatus && postDetail.availabilityStatus}</Text>
+      
+      {/* <Text style={styles.description} numberOfLines={1} ellipsizeMode="tail">Link: {postDetail.storeLink}</Text> */}
     </View>
 
     <Image source={{ uri: imageUrl[0] }} style={styles.image} resizeMode="contain" />

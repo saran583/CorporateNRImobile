@@ -26,10 +26,7 @@ const MessagesScreen = ({selection}) => {
       console.log("updated messages",messagesReceived)
     },[messagesReceived])
 
-  // const selection= route.params.selection
-
   const getInterests= async ()=>{
-    console.log("changes")
     const res= await fetch("https://my9ivim6h2.execute-api.us-east-1.amazonaws.com/default/getInterests?"+userId)
     const responses = await res.json()
     console.log(responses)
@@ -40,9 +37,11 @@ const MessagesScreen = ({selection}) => {
         console.log("outside interest", interest)
         if(interest.sender_id==userId){
           console.log("inside interest", interest)
-          sent = [...sent, {
+          sent.push({
               id: interest.id,
               listingId: interest.listing_id,
+              senderId: interest.sender_id,
+              hostId: interest.host_id,
               type: "sent",
               name: interest.first_name+" "+interest.last_name,
               contact: interest.mobile_number,
@@ -50,20 +49,25 @@ const MessagesScreen = ({selection}) => {
               postTitle: interest.listing_title,
               postImage: interest.image_url.split(",")[0],
               message: interest.message,
-              createdAt: interest.created_at
-          }]
-        }else{
+              createdAt: interest.created_at,
+              seen:1
+          })
+        }
+        if(interest.host_id==userId){
           received.push({
               id: interest.id,
               type: "received",
               listingId: interest.listing_id,
+              senderId: interest.sender_id,
+              hostId: interest.host_id,
               name: interest.first_name+" "+interest.last_name,
               contact: interest.mobile_number,
               email: interest.email,
               postTitle: interest.listing_title,
               postImage: interest.image_url.split(",")[0],
               message: interest.message,
-              createdAt: interest.created_at
+              createdAt: interest.created_at,
+              seen: interest.seen
           })
         }
       })
@@ -72,28 +76,57 @@ const MessagesScreen = ({selection}) => {
       setMessagesSent([...sent])
   }
 
+  const updateInterest = async(message) =>{
+    if(message.type === "received"){
+      const updatedMessages = messagesReceived.map((oldMessage)=>{
+        if(oldMessage.id == message.id){
+          return {...message, seen:1}
+
+        }
+        return oldMessage
+      });
+      setMessagesReceived(updatedMessages)
+      const res= await fetch("https://my9ivim6h2.execute-api.us-east-1.amazonaws.com/default/updateInterest",{
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          listingId: message.listingId,
+          senderId: message.senderId,
+          hostId: message.hostId
+        })
+      })
+      const responses = await res.json()
+      console.log(responses)
+
+    }
+  }
+
  
     
 
 
     const MessageCard = ({ message }) => {
         const isReceived = message.type === "received";
-      
         return (
           <View style={[styles.messageContainer, isReceived ? styles.received : styles.sent]}>
             
           {/* <Text style={{fontWeight:"bold", textAlign:"center", marginBottom: 5, fontSize: 17}}>I am Interested</Text> */}
-          <TouchableOpacity onPress={()=>{setInterestData(message); setModalVisible(true)}}>
+          <TouchableOpacity onPress={()=>{setInterestData(message); setModalVisible(true); updateInterest(message)}}>
             <View style={styles.dataContainer}>
             <View style={[styles.box, styles.box1]}>
             <Image source={{uri: message.postImage}} style={styles.profileImage} />
             </View>
             <View style={[styles.box, styles.box2]}>
             <View style={{flexDirection: 'row', width: "100%", overflow: "hidden", paddingRight: 5, justifyContent: "space-between"}}>
-            <Text style={{...styles.name, width: "60%", overflow:"hidden"}} numberOfLines={1} ellipsizeMode="tail">{message.name}</Text>
+            <Text style={{...styles.name, width: "60%", overflow:"hidden", fontWeight: message.seen ==0 ? "bold": "normal"}} numberOfLines={1} ellipsizeMode="tail">{message.name}</Text>
             <Text style={{fontSize: 12}} numberOfLines={1} ellipsizeMode="tail">{formatTimestamp(message.createdAt)}</Text>
             </View>
+            <View style={{flexDirection: 'row', width: "100%", overflow: "hidden", paddingRight: 5, justifyContent: "space-between"}}>
             <Text style={styles.contact} numberOfLines={3} ellipsizeMode="tail">{message.message}</Text>
+            {message.seen ==0 && <Text style={{fontWeight:"bold"}}>New Message</Text>}
+            </View>
             {/* <Text style={styles.contact}>{message.contact}</Text> */}
             </View>
             {/* <TouchableOpacity onPress={()=>{navigation.navigate("DetailPage")}}>

@@ -7,6 +7,7 @@ import { Colors } from '@/constants/Colors';
 
 const CardLayout = ({posts, onRefreshCalled, selectedCategory, updateSelectedCategory}) => {
   const [refreshing, setRefreshing] = useState(false);
+  console.log("selected Category", selectedCategory)
 
   
 
@@ -22,7 +23,7 @@ const CardLayout = ({posts, onRefreshCalled, selectedCategory, updateSelectedCat
   const navigation = useNavigation()
   return (
     <View style={{backgroundColor: Colors.secondary, height: "100%", paddingBottom:10}}>
-    <CategoryTabs selectedCategory={selectedCategory} updateSelectedCategory={updateSelectedCategory}></CategoryTabs>
+    {selectedCategory && <CategoryTabs selectedCategory={selectedCategory} updateSelectedCategory={updateSelectedCategory}></CategoryTabs>}
     <ScrollView style={styles.container} 
     refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
       {posts.map((post,index)=>{
