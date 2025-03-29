@@ -9,6 +9,7 @@ import CategoryTabs from '@/components/ui/FilterTab';
 import Icon from 'react-native-vector-icons/MaterialIcons'; 
 import { Modal } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import moment from 'moment';
 
 export default function TabFourScreen() {
   const navigation = useNavigation()
@@ -73,8 +74,11 @@ export default function TabFourScreen() {
   </View>:<View style={{backgroundColor:Colors.secondary}}>
     <CategoryTabs selectedCategory={selectedCategory} updateSelectedCategory={updateSelectedCategory}></CategoryTabs>
     <View style={{flexDirection: 'row', justifyContent: "space-between", marginHorizontal: 20}}>
-    <Text style={{marginVertical:"auto"}}>Filter by Date</Text>
+    <Text style={{marginVertical:"auto"}}>Posts created on {moment(selectedDate).format("YYYY/MM/DD")}</Text>
+    <View style={{flexDirection: "row"}}>
+    <Text style={{marginVertical:"auto"}}>Filter: </Text>
     <TouchableOpacity onPress={()=>{setShowDatePicker(true)}}><Icon size={35} name="edit-calendar" ></Icon></TouchableOpacity>
+    </View>
     </View>
     <CardLayout posts={posts} onRefreshCalled={getTodayPosts}   />
     <Modal transparent visible={showDatePicker} animationType="slide">
@@ -85,7 +89,7 @@ export default function TabFourScreen() {
                 maximumDate={new Date()}
                 mode="date"
                 display="default"
-                onChange={(event, selectedDate) => { setShowDatePicker(false); getTodayPosts(selectedCategory, selectedDate) }}
+                onChange={(event, selectedDate) => { setShowDatePicker(false); getTodayPosts(selectedCategory, selectedDate); setSelectedDate(selectedDate) }}
                 />
             </View>
           </Modal>

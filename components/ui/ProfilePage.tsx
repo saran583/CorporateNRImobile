@@ -12,6 +12,7 @@ import {
 import * as ImagePicker from 'expo-image-picker';
 import { useSelector } from "react-redux";
 import moment from "moment";
+import PhoneInput, { isValidPhoneNumber } from "react-native-international-phone-number";
 
 
 const ProfileScreen = ({navigation}) => {
@@ -33,7 +34,12 @@ const ProfileScreen = ({navigation}) => {
   const [otp, setOtp] = useState("")
   const [showOtp, setShowOtp] = useState(false)
   const [error, setError] = useState("")
+  const [countryCode, setCountryCode] = useState('+1');
 
+  useEffect(()=>{
+    console.log("profile data",profileData)
+
+  },[profileData])
 
 
   const getProfileData = async ()=>{
@@ -86,6 +92,12 @@ const ProfileScreen = ({navigation}) => {
   });
 
   const [errors, setErrors] = useState({});
+
+
+
+
+  
+
 
   const validateFields = () => {
     let newErrors = {};
@@ -259,8 +271,9 @@ const ProfileScreen = ({navigation}) => {
         editable
         isEditing={editFields.mobile}
         onEdit={() => handleEditToggle("mobile")}
-        onChangeText={(text) => setProfileData({ ...profileData, mobile: text })}
+        onChangeText={(text) =>{ console.log("inside profile", text),setProfileData({ ...profileData, mobile: text })}}
         error={errors.mobile}
+        mobileDetails={{mobile:profileData.mobile, countryCode: countryCode, setCountryCode: setCountryCode, setErrors: setErrors}}
       />
 
       <ProfileField
@@ -276,8 +289,8 @@ const ProfileScreen = ({navigation}) => {
             key={key}
             label={key.charAt(0).toUpperCase() + key.slice(1)}
             value={address[key]}
-            isEditing={true}
-            onChangeText={(text) => setAddress({ ...address, [key]: text })}
+            isEditing={ key === "country"? false: true}
+            onChangeText={(text) => { setAddress({ ...address, [key]: text }) }}
           />
         ))}
 
@@ -298,6 +311,8 @@ const ProfileScreen = ({navigation}) => {
             onChangeText={(text) => setPreferredLocation({ ...preferredLocation, [key]: text })}
           />
         ))}
+
+        
 
       {/* Buttons */}
       <View style={styles.buttonRow}>
@@ -330,8 +345,9 @@ const ProfileScreen = ({navigation}) => {
 };
 
 
-const ProfileField = ({ label, value, editable, isEditing, onEdit, onChangeText, error, extra }) => (
-  <View style={styles.section}>
+const ProfileField = ({ label, value, editable, isEditing, onEdit, onChangeText, error, mobileDetails, extra }) => {
+  if(label === "Mobile"){console.log("sd",{ label, value, editable, isEditing, onEdit, onChangeText, error, mobileDetails, extra })}
+  return <View style={styles.section}>
     <View style={styles.row}>
       <Text style={styles.sectionTitle}>{label}</Text>
       {editable && (
@@ -340,15 +356,42 @@ const ProfileField = ({ label, value, editable, isEditing, onEdit, onChangeText,
         </TouchableOpacity>
       )}
     </View>
-    {isEditing && (label !== "Address" && label !== "Preferred Location") ? (
+    { ( label === "Mobile") && (
+      <PhoneInput
+          phoneInputStyles={{
+            container: isEditing? {
+              borderWidth: 1,
+              borderStyle: 'solid',
+              borderColor: error?'red':'#ddd',
+            }:{
+              display: "none",
+              borderWidth: 1,
+              borderStyle: 'solid',
+              borderColor: error?'red':'#ddd',}}}
+          value={value}
+          onChangePhoneNumber={(val)=>{onChangeText(val)}}
+          selectedCountry={mobileDetails.countryCode}
+          onChangeSelectedCountry={mobileDetails.setCountryCode}
+          placeholder="Enter Mobile Number"
+          onBlur={()=>{if(value !=="" && !isValidPhoneNumber(value, mobileDetails.countryCode)){mobileDetails.setErrors((prevErrors)=>({...prevErrors, ["mobile"]: "Please enter a valid mobile number"}))}}}
+          // showOnly={['BR', 'PT', 'CA', 'US']}
+          defaultCountry='US'
+        />
+
+    )}
+    {isEditing && (label !== "Address" && label !== "Preferred Location" && label !== "Mobile") ? (
       <TextInput style={styles.input} value={value} onChangeText={onChangeText} />
-    ) : (
+    ) :
+    (label !== "Mobile") ? (
+      <Text style={styles.label}>{value}</Text>
+    ): !isEditing && (
       <Text style={styles.label}>{value}</Text>
     )}
     {extra}
     {error && <Text style={styles.error}>{error}</Text>}
   </View>
-);
+};
+
 
 
 const styles = StyleSheet.create({
