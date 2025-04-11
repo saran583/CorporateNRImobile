@@ -316,10 +316,10 @@ const ProfileScreen = ({navigation}) => {
 
       {/* Buttons */}
       <View style={styles.buttonRow}>
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity style={styles.button} onPress={()=>{navigation.navigate("ChangePassword")}}>
           <Text style={styles.buttonText}>Change Password</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity style={styles.button} onPress={()=>{navigation.navigate("GetHistory")}}>
           <Text style={styles.buttonText}>History</Text>
         </TouchableOpacity>
       </View>

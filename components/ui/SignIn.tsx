@@ -1,4 +1,4 @@
-import { setUserId, setUserName } from "@/app/rentalSlice";
+import { setUserEmail, setUserId, setUserName } from "@/app/rentalSlice";
 import { Colors } from "@/constants/Colors";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Modal } from "react-native";
@@ -104,12 +104,13 @@ const SignInScreen = ({navigation}) => {
       });
 
       const data = await response.json();
-      console.log(data)
+      console.log("userdata",data)
       if (response.ok) {
         setApiError('');
         setLoading(false)
         dispatch(setUserId(data.userId))
         dispatch(setUserName(data.name))
+        dispatch(setUserEmail(data.userEmail))
         
         
         // Navigate to another screen on successful login

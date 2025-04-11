@@ -33,6 +33,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
+import ChangePasswordScreen from '@/components/ui/ChangePassword';
+import GetHistory from '@/components/ui/GetHistory';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashPage.preventAutoHideAsync();
@@ -204,6 +206,20 @@ try{
         <Stack.Screen name="SignIn" component={LoginScreen}   options={{ headerShown: false }} />
         <Stack.Screen name="Login" component={SignInScreen}  options={{ headerShown: false }} />
         <Stack.Screen name="SignUp" component={SignUpPage}  options={{ headerShown: false }} />
+        <Stack.Screen name="ChangePassword" component={ChangePasswordScreen}  options={{
+            headerTitle: "🔒 Change Password",
+            headerStyle: { backgroundColor: Colors.primary },
+            headerTintColor: "#fff",
+            headerTitleStyle: { fontWeight: "bold" },
+          }} />
+
+        <Stack.Screen name="GetHistory" component={GetHistory}  options={{
+            headerTitle: "History",
+            headerStyle: { backgroundColor: Colors.primary },
+            headerTintColor: "#fff",
+            headerTitleStyle: { fontWeight: "bold" },
+          }} />
+
 
         {/* <Stack.Screen name="Signup" component={SignupScreen} /> */}
         <Stack.Screen name="Home" component={HomeScreen}  options={{ headerShown: false }}          />

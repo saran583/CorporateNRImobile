@@ -7,17 +7,13 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { formatTimestamp } from '../Utils';
 
 
-const renderCard = (navigation, post, width=Dimensions.get('window').width * 0.90) => {
-
-    
+const renderCard = (navigation, post, width=Dimensions.get('window').width * 0.90) => {    
   return <TouchableOpacity key={post.index} onPress={()=>{ 
       navigation.navigate("DetailPage",post)}}>
     <View style={[styles.card, {width: width}]} >
     <View style={styles.content}>
     <View style={styles1.cardHeader}>
-    <Icon name="home" size={45} color={Colors.primary}
-          // style={styles1.avatar}
-        />
+    <Icon name="home" size={45} color={Colors.primary}/>
         <View>
         <Text style={styles.title}  numberOfLines={1} ellipsizeMode="tail">{post?.title}</Text>
         <Text style={styles.status}>
@@ -170,7 +166,6 @@ const renderCard = (navigation, post, width=Dimensions.get('window').width * 0.9
     },
     features: {
       flexDirection: 'row',
-      // flexWrap: 'wrap',
       marginVertical: 5,
       overflow: "scroll"
     },

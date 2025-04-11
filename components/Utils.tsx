@@ -131,4 +131,3 @@ export const formatTimestamp = (timestamp) => {
       return time.format("YYYY-MM-DD"); // Show date if more than a day old
     }
   };
-

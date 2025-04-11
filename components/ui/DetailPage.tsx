@@ -7,7 +7,6 @@ import ImageModal from "../ImageModal";
 import InterestModal from "../InterestModal";
 
 const PropertyDetails = ({route}) => {
-  console.log(route)
   let post = route.params
   const [postDetail, setPostDetail] = useState({})
   const [loading, setLoading] = useState(true)
@@ -23,8 +22,6 @@ const PropertyDetails = ({route}) => {
     setLoading(false)
   }
 
-
-
   const [mainImage, setMainImage] = useState(post.images[0]);
 
   useEffect(()=>{
@@ -34,7 +31,6 @@ const PropertyDetails = ({route}) => {
   const onShowModal = ({product,images}) =>{
     setModalData({product:product, images:images})
     setShowModal(true)
-
   }
 
   const CardData =(postDetail,index)=>{
@@ -62,10 +58,8 @@ const PropertyDetails = ({route}) => {
 
   return (
     <ScrollView style={styles.container}>
-      {/* Main Image */}
       <Image source={{uri: mainImage}} style={styles.mainImage} />
 
-      {/* Horizontal ScrollView for Thumbnails */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.imageScroll}>
         {post.images.map((img, index) => (
           <TouchableOpacity key={index} onPress={() => setMainImage(img)}>
@@ -77,7 +71,6 @@ const PropertyDetails = ({route}) => {
       {showModal&& <ImageModal  onClose={()=>{setShowModal(false);}} images={modalData.images} product={modalData.product}></ImageModal>}
       {showInterestModal&&<InterestModal postDetail={{listingId: postDetail.id, hostId: postDetail.created_by}} onClose={()=>{setShowInterestModal(false)}} ></InterestModal>}
 
-      {/* Property Details */}
       <View style={styles.detailsContainer}>
         <Text style={styles.title}>{post.title}</Text>
         <Text style={styles.location}>{post.location+","+postDetail.city?postDetail.city:""}</Text>
@@ -117,7 +110,6 @@ const PropertyDetails = ({route}) => {
   );
 };
 
-// Reusable Component for Property Info
 const InfoItem = ({ label, value }) => (
   <View style={styles.infoItem}>
     <Text style={styles.label}>{label}:</Text>
