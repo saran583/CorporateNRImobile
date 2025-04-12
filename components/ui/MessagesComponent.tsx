@@ -29,7 +29,7 @@ const MessagesScreen = ({selection}) => {
   const getInterests= async ()=>{
     const res= await fetch("https://my9ivim6h2.execute-api.us-east-1.amazonaws.com/default/getInterests?"+userId)
     const responses = await res.json()
-    console.log(responses)
+    console.log("interest responses",responses)
     let received = []
     let sent = []
     // if(responses){
@@ -63,7 +63,7 @@ const MessagesScreen = ({selection}) => {
               name: interest.first_name+" "+interest.last_name,
               contact: interest.mobile_number,
               email: interest.email,
-              postTitle: interest.listing_title,
+              postTitle: interest.listing_title || interest.listing_category + " items for Sale",
               postImage: interest.image_url.split(",")[0],
               message: interest.message,
               createdAt: interest.created_at,

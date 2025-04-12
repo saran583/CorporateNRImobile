@@ -37,7 +37,7 @@ const ChangePasswordScreen = () => {
   };
 
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
      if (!currentPassword) {
       setError('Please enter your current password.');
     } else if (!validatePassword(newPassword)) {
@@ -49,7 +49,25 @@ const ChangePasswordScreen = () => {
     } else {
       setError('');
       // Submit logic here
-      Alert.alert('Success', 'Password changed successfully!');
+      const response = await fetch('https://my9ivim6h2.execute-api.us-east-1.amazonaws.com/default/changePassword', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({email:email, password:newPassword, currentPassword:currentPassword}),
+        });
+    
+        const data = await response.json();
+        console.log(data)
+        if(data.message == "Current Password is incorrect"){
+          setError("Current Password is incorrect")
+        }
+        else {
+          Alert.alert('Success', 'Password changed successfully!');
+          setConfirmNewPassword("")
+          setCurrentPassword("")
+          setNewPassword("")
+        }
     }
   };
 
